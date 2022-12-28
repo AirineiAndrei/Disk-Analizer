@@ -1,1 +1,1 @@
-# Disk-Analizer
+# Disk-Analyzer
