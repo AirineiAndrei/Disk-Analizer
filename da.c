@@ -1,36 +1,31 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <fcntl.h>
-#include <unistd.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <signal.h>
 #include <errno.h>
 #include <inttypes.h>
+#include <fcntl.h>
+#include <unistd.h>
 
 #define ADD 1
 #define SUSPEND 2
 #define RESUME 3
-#define KILL 4
+#define REMOVE 4
 #define INFO 5
 #define LIST 6
 #define PRINT 7
-#define PID_PATH "TempData/daemon.pid"
-#define OUTPUT_PATH "TempData/daemon_output.txt"
-#define INSTRUCTION_PATH "TempData/daemon_instruction.txt"
 
-int daemon_pid;
-int process_pid;
-
-pid_t get_daemon_pid(){}
-
-void send_daemon_instruction(char *instructions){}
-
-void init(){
-	daemon_pid = get_daemon_pid();
-	process_pid = getpid();
-	//signal(SIGUSR2, print_daemon_output);
+int check_error_strtol(const char* nptr, char *endptr, long int n){
+    if(nptr == endptr)
+        return 1;
+    else if(errno == ERANGE || errno == EINVAL)
+        return 1;
+    else if(errno != 0 && n == 0)
+        return 1;
+    
+    return 0;
 }
 
 int is_option(const char *option, const char *str1, const char *str2){
@@ -39,22 +34,15 @@ int is_option(const char *option, const char *str1, const char *str2){
 
 int main(int argc, char **argv){
 
-	init();
-
 	if(argc == 1){
-		printf("No arguments provided. Exiting...\n");
+		printf("Invalid number of arguments.\n");
 		return 0;
 	}
 
-	// buffer for instructions to be sent to daemon
-	char instructions[1024];
-
-	// Other options
-
-	/// Add a new analysis task
+	/// --------------- Add ---------------
 	if(is_option(argv[1], "-a", "--add")){
 		if(argc < 3){
-			printf("Not enough arguments provided. Exiting...\n");
+			printf("Invalid number of arguments.\n");
 			return -1;
 		}
 
@@ -62,121 +50,156 @@ int main(int argc, char **argv){
 		char *path = argv[2];
 
 		if(argc == 5 && is_option(argv[3], "-p", "--priority")){
-			priority = atoi(argv[4]);
+			const char* nptr = argv[4];
+            char *endptr = NULL;
+            priority = strtol(nptr, &endptr, 10);
 
-			if(priority < 1 || priority > 3){
-				printf("Priority should have one of the values: 1-low, 2-normal, 3-high.\n");
+            if(check_error_strtol(nptr, endptr, priority)){
+                printf("Invalid number.\n");
+                return -1;
+            }
+
+			if(!(1 <= priority  && priority <= 3)){
+				printf("Priority out of valid range.\n");
 				return -1;
 			}
 		}
 
-		sprintf(instructions, "TYPE %d\nPRIORITY %d\nPATH %s\nPPID %d", ADD, priority, path, process_pid);
-		//send_daemon_instruction(instructions);
+
 
 		return 0;
 	}
 
-	/// Suspend
+	/// --------------- Suspend ---------------
 	if(is_option(argv[1], "-S", "--suspend")){
-		if(argc < 3){
-			printf("Not enough arguments provided. Exiting...\n");
+		if(argc != 3){
+			printf("Invalid number of arguments.\n");
 			return -1;
 		}
 
-		int pid = atoi(argv[2]);
+		const char* nptr = argv[2];
+		char *endptr = NULL;
+		int pid = strtol(nptr, &endptr, 10);
 
-		sprintf(instructions, "TYPE %d\nPID %d\nPPID %d", SUSPEND, pid, process_pid);
-		//send_daemon_instruction(instructions);
+		if(check_error_strtol(nptr, endptr, pid) || pid < 1){
+			printf("Invalid number.\n");
+			return -1;
+		}
+		
+
 
 		return 0;
 	}
 
-	/// Resume
+	/// --------------- Resume ---------------
 	if(is_option(argv[1], "-R", "--resume")){
-		if(argc < 3){
-			printf("Not enough arguments provided. Exiting...\n");
+		if(argc != 3){
+			printf("Invalid number of arguments.\n");
 			return -1;
 		}
 
-		int pid = atoi(argv[2]);
+		const char* nptr = argv[2];
+		char *endptr = NULL;
+		int pid = strtol(nptr, &endptr, 10);
 
-		sprintf(instructions, "TYPE %d\nPID %d\nPPID %d", RESUME, pid, process_pid);
-		//send_daemon_instruction(instructions);
+		if(check_error_strtol(nptr, endptr, pid) || pid < 1){
+			printf("Invalid number.\n");
+			return -1;
+		}
+
+		
 
 		return 0;
 	}
 
-	/// Kill
+	/// --------------- Remove ---------------
 	if(is_option(argv[1], "-r", "--remove")){
-		if(argc < 3){
-			printf("Not enough arguments provided. Exiting...\n");
+		if(argc != 3){
+			printf("Invalid number of arguments.\n");
 			return -1;
 		}
 
-		int pid = atoi(argv[2]);
+		const char* nptr = argv[2];
+		char *endptr = NULL;
+		int pid = strtol(nptr, &endptr, 10);
 
-		sprintf(instructions, "TYPE %d\nPID %d\nPPID %d", KILL, pid, process_pid);
-		//send_daemon_instruction(instructions);
+		if(check_error_strtol(nptr, endptr, pid) || pid < 1){
+			printf("Invalid number.\n");
+			return -1;
+		}
+
+		
 
 		return 0;
 	}
 
-	/// Info
+	/// --------------- Info ---------------
 	if(is_option(argv[1], "-i", "--info")){
-		if(argc < 3){
-			printf("Not enough arguments provided. Exiting...\n");
+		if(argc != 3){
+			printf("Invalid number of arguments.\n");
 			return -1;
 		}
 
-		int pid = atoi(argv[2]);
+		const char* nptr = argv[2];
+		char *endptr = NULL;
+		int pid = strtol(nptr, &endptr, 10);
 
-		sprintf(instructions, "TYPE %d\nPID %d\nPPID %d", INFO, pid, process_pid);
-		//send_daemon_instruction(instructions);
+		if(check_error_strtol(nptr, endptr, pid) || pid < 1){
+			printf("Invalid number.\n");
+			return -1;
+		}
+		
+
 
 		return 0;
 	}
 
-	/// List
+	/// --------------- List ---------------
 	if(is_option(argv[1], "-l", "--list")){
-		if(argc < 2){
-			printf("Invalid command. Exiting...\n");
+		if(argc != 2){
+			printf("Invalid command.\n");
 			return -1;
 		}
 
-		sprintf(instructions, "TYPE %d\nPID %d\nPPID %d", LIST, 0, process_pid);
-		//send_daemon_instruction(instructions);
+		
 
 		return 0;
 	}
 
-	/// Analysis report for tasks that are "done"
+	/// --------------- Print ---------------
 	if(is_option(argv[1], "-p", "--print")){
-		if(argc < 3) return -1;
-		int pid = atoi(argv[2]);
-		sprintf(instructions, "TYPE %d\nPID %d\nPPID %d", PRINT, pid, process_pid);
-		send_daemon_instruction(instructions);
+		if(argc != 3) {
+			printf("Invalid number of arguments.\n");
+			return -1;
+		}
+		
+		const char* nptr = argv[2];
+		char *endptr = NULL;
+		int pid = strtol(nptr, &endptr, 10);
+
+		if(check_error_strtol(nptr, endptr, pid) || pid < 1){
+			printf("Invalid number.\n");
+			return -1;
+		}
+		
+		
+
 		return 0;
 	}
 
-	/// Terminate
+	/// --------------- Terminate ---------------
 	if(is_option(argv[1], "-t", "--terminate")){
-		if(argc > 2){
-			printf("Invalid command. Exiting...\n");
+		if(argc != 2){
+			printf("Invalid command.\n");
 			return -1;
 		}
 
-		pid_t aux_pid = get_daemon_pid();
 
-		if(aux_pid != -1)
-			kill(aux_pid, SIGTERM);
-
-		printf("Daemon with PID `%d` terminated\n", aux_pid);
 
 		return 0;
 	}
 
-
-	/// Helper
+	/// --------------- Helper ---------------
 	if(is_option(argv[1], "-h", "--help")){
 		printf("Usage: da [OPTION]... [DIR]...\n"
 			   "Analyze the space occupied by the directory at [DIR]\n\n"
@@ -193,6 +216,7 @@ int main(int argc, char **argv){
 		return 0;
 	}
 
-	printf("Unknown command. Exiting...\n");
+	printf("Invalid command.\n");
 	return 0;
+
 }
