@@ -9,6 +9,11 @@
 #include <fcntl.h>
 #include <unistd.h>
 
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+
 #define ADD 1
 #define SUSPEND 2
 #define RESUME 3
@@ -16,6 +21,40 @@
 #define INFO 5
 #define LIST 6
 #define PRINT 7
+
+struct sockaddr_in sa;
+int res;
+int SocketFD;
+
+void open_socket()
+{
+	SocketFD = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP);
+
+    if (SocketFD == -1) {
+      perror("cannot create socket");
+      exit(EXIT_FAILURE);
+    }
+  
+    memset(&sa, 0, sizeof sa);
+  
+    sa.sin_family = AF_INET;
+    sa.sin_port = htons(1100);
+    sa.sin_addr.s_addr = 0;
+	printf("done port\n");
+
+    if (connect(SocketFD, (struct sockaddr *)&sa, sizeof sa) == -1) {
+	printf("connect failed\n");
+      perror("connect failed");
+      close(SocketFD);
+      exit(EXIT_FAILURE);
+    }
+	printf("done connect\n");
+}
+
+void close_socket()
+{
+	close(SocketFD);
+}
 
 int check_error_strtol(const char* nptr, char *endptr, long int n){
     if(nptr == endptr)
@@ -31,8 +70,15 @@ int check_error_strtol(const char* nptr, char *endptr, long int n){
 int is_option(const char *option, const char *str1, const char *str2){
 	return strcmp(option, str1) == 0 || strcmp(option, str2) == 0;
 }
+void send_request(const char* const buff, const int size)
+{
+	write(SocketFD,buff,size);
+}
 
 int main(int argc, char **argv){
+
+	open_socket();// TODO close socket
+	printf("opened socket\n");
 
 	if(argc == 1){
 		printf("Invalid number of arguments.\n");
