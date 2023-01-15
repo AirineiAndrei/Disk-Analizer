@@ -26,11 +26,11 @@ void create_socket()
         exit(EXIT_FAILURE);
     }
 
-    // if (setsockopt(SocketFD, SOL_SOCKET, SO_REUSEADDR, &(int) {1}, sizeof(int)) == -1)
-    // {
-    //     syslog(LOG_ERR, "The da_daemon: reuse address socket failed. Error: %s\n", strerror(errno));
-    //     exit(EXIT_FAILURE);
-    // }
+    if (setsockopt(SocketFD, SOL_SOCKET, SO_REUSEADDR, &(int) {1}, sizeof(int)) == -1)
+    {
+        syslog(LOG_ERR, "The da_daemon: reuse address socket failed. Error: %s\n", strerror(errno));
+        exit(EXIT_FAILURE);
+    }
 
     memset(&sa, 0, sizeof sa);
 
@@ -101,10 +101,10 @@ struct request_details * get_request_details(const char *const buff){
     if(sscanf(buff, "ID %d\n", &incoming_request->id) == 1)
     {
 
+        incoming_request->path = malloc(sizeof(char) * MAX_PATH_LENGTH);
+
         if(incoming_request->id == ADD)
         {
-            incoming_request->path = malloc(sizeof(char) * MAX_PATH_LENGTH);
-
             if(sscanf(buff, "ID %d\nPRIORITY %d\nPATH %s\n", &incoming_request->id, &incoming_request->priority, incoming_request->path) != 3)
             {
                 syslog(LOG_ERR, "The da_daemon: request read failed. Error: %s\n", strerror(errno));
@@ -116,9 +116,6 @@ struct request_details * get_request_details(const char *const buff){
             || incoming_request->id == REMOVE || incoming_request->id == INFO
             || incoming_request->id == PRINT)
         {
-
-            incoming_request->path = malloc(sizeof(char) * MAX_PATH_LENGTH);
-
             if(sscanf(buff, "ID %d\nPID %d\n", &incoming_request->id, &incoming_request->arg_pid) != 2)
             {
                 syslog(LOG_ERR, "The da_daemon: request read failed. Error: %s\n", strerror(errno));
@@ -156,6 +153,8 @@ _Noreturn int run_daemon()
         int size = 512;
         int nr_read = read(ConnectFD, instructions, size);
 
+        syslog(LOG_NOTICE, "Daemon read %d\n", nr_read);
+
         if (nr_read < 1)
         {
             syslog(LOG_ERR, "The da_daemon: read failed. Error: %s\n", strerror(errno));
@@ -168,11 +167,13 @@ _Noreturn int run_daemon()
 
             // execute the instructions
 
-            if(current_request != NULL) 
+            if(current_request != NULL && current_request->path != NULL) 
             {
-                if(current_request->path != NULL)
-                    free(current_request->path);
+                free(current_request->path);
+            }
 
+            if(current_request != NULL)
+            {
                 free(current_request);
             }
 
