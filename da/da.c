@@ -14,7 +14,7 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 
-#include "Shared/shared.h"
+#include "../Shared/shared.h"
 
 struct sockaddr_in sa;
 int SocketFD;
