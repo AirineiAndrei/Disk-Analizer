@@ -56,7 +56,7 @@ void open_socket()
 	sa.sin_family = AF_INET;
 	sa.sin_port = htons(1100);
 	sa.sin_addr.s_addr = 0;
-	printf("done port\n");
+	// printf("done port\n");
 
 	if (connect(SocketFD, (struct sockaddr *)&sa, sizeof sa) == -1)
 	{
@@ -66,7 +66,7 @@ void open_socket()
 		exit(EXIT_FAILURE);
 	}
 
-	printf("done connect\n");
+	// printf("done connect\n");
 }
 
 void close_socket()
@@ -134,13 +134,13 @@ int main(int argc, char **argv)
 {
 	create_return_socket();
 	open_socket(); // TODO close sock
-	printf("opened socket\n");
+	// printf("opened socket\n");
 
 	if (argc == 1)
 	{
 		printf("Invalid number of arguments.\n");
 		close_socket();
-		printf("closed socket\n");
+		//printf("closed socket\n");
 		return 0;
 	}
 
@@ -153,7 +153,7 @@ int main(int argc, char **argv)
 		{
 			printf("Invalid number of arguments.\n");
 			close_socket();
-			printf("closed socket\n");
+			//printf("closed socket\n");
 			return -1;
 		}
 
@@ -170,7 +170,7 @@ int main(int argc, char **argv)
 			{
 				printf("Invalid number.\n");
 				close_socket();
-				printf("closed socket\n");
+				//printf("closed socket\n");
 				return -1;
 			}
 
@@ -178,7 +178,7 @@ int main(int argc, char **argv)
 			{
 				printf("Priority out of valid range.\n");
 				close_socket();
-				printf("closed socket\n");
+				//printf("closed socket\n");
 				return -1;
 			}
 		}
@@ -189,7 +189,7 @@ int main(int argc, char **argv)
 		print_daemon_response();
 
 		close_socket();
-		printf("closed socket\n");
+		//printf("closed socket\n");
 
 		return 0;
 	}
@@ -201,7 +201,7 @@ int main(int argc, char **argv)
 		{
 			printf("Invalid number of arguments.\n");
 			close_socket();
-			printf("closed socket\n");
+			//printf("closed socket\n");
 			return -1;
 		}
 
@@ -213,7 +213,7 @@ int main(int argc, char **argv)
 		{
 			printf("Invalid number.\n");
 			close_socket();
-			printf("closed socket\n");
+			//printf("closed socket\n");
 			return -1;
 		}
 
@@ -223,7 +223,7 @@ int main(int argc, char **argv)
 		print_daemon_response();
 
 		close_socket();
-		printf("closed socket\n");
+		//printf("closed socket\n");
 
 		return 0;
 	}
@@ -235,7 +235,7 @@ int main(int argc, char **argv)
 		{
 			printf("Invalid number of arguments.\n");
 			close_socket();
-			printf("closed socket\n");
+			//printf("closed socket\n");
 			return -1;
 		}
 
@@ -247,7 +247,7 @@ int main(int argc, char **argv)
 		{
 			printf("Invalid number.\n");
 			close_socket();
-			printf("closed socket\n");
+			//printf("closed socket\n");
 			return -1;
 		}
 
@@ -257,7 +257,7 @@ int main(int argc, char **argv)
 		print_daemon_response();
 
 		close_socket();
-		printf("closed socket\n");
+		//printf("closed socket\n");
 
 		return 0;
 	}
@@ -269,7 +269,7 @@ int main(int argc, char **argv)
 		{
 			printf("Invalid number of arguments.\n");
 			close_socket();
-			printf("closed socket\n");
+			//printf("closed socket\n");
 			return -1;
 		}
 
@@ -281,7 +281,7 @@ int main(int argc, char **argv)
 		{
 			printf("Invalid number.\n");
 			close_socket();
-			printf("closed socket\n");
+			//printf("closed socket\n");
 			return -1;
 		}
 
@@ -289,7 +289,7 @@ int main(int argc, char **argv)
 		send_request(instructions, strlen(instructions));
 
 		close_socket();
-		printf("closed socket\n");
+		//printf("closed socket\n");
 
 		return 0;
 	}
@@ -301,7 +301,7 @@ int main(int argc, char **argv)
 		{
 			printf("Invalid number of arguments.\n");
 			close_socket();
-			printf("closed socket\n");
+			//printf("closed socket\n");
 			return -1;
 		}
 
@@ -313,7 +313,7 @@ int main(int argc, char **argv)
 		{
 			printf("Invalid number.\n");
 			close_socket();
-			printf("closed socket\n");
+			//printf("closed socket\n");
 			return -1;
 		}
 
@@ -321,7 +321,7 @@ int main(int argc, char **argv)
 		send_request(instructions, strlen(instructions));
 
 		close_socket();
-		printf("closed socket\n");
+		//printf("closed socket\n");
 
 		return 0;
 	}
@@ -333,7 +333,7 @@ int main(int argc, char **argv)
 		{
 			printf("Invalid command.\n");
 			close_socket();
-			printf("closed socket\n");
+			//printf("closed socket\n");
 			return -1;
 		}
 
@@ -341,7 +341,7 @@ int main(int argc, char **argv)
 		send_request(instructions, strlen(instructions));
 
 		close_socket();
-		printf("closed socket\n");
+		//printf("closed socket\n");
 
 		return 0;
 	}
@@ -353,7 +353,7 @@ int main(int argc, char **argv)
 		{
 			printf("Invalid number of arguments.\n");
 			close_socket();
-			printf("closed socket\n");
+			//printf("closed socket\n");
 			return -1;
 		}
 
@@ -365,7 +365,7 @@ int main(int argc, char **argv)
 		{
 			printf("Invalid number.\n");
 			close_socket();
-			printf("closed socket\n");
+			//printf("closed socket\n");
 			return -1;
 		}
 
@@ -373,7 +373,7 @@ int main(int argc, char **argv)
 		send_request(instructions, strlen(instructions));
 
 		close_socket();
-		printf("closed socket\n");
+		//printf("closed socket\n");
 
 		return 0;
 	}
@@ -385,7 +385,7 @@ int main(int argc, char **argv)
 		{
 			printf("Invalid command.\n");
 			close_socket();
-			printf("closed socket\n");
+			//printf("closed socket\n");
 			return -1;
 		}
 
@@ -393,7 +393,7 @@ int main(int argc, char **argv)
 		send_request(instructions, strlen(instructions));
 
 		close_socket();
-		printf("closed socket\n");
+		//printf("closed socket\n");
 
 		return 0;
 	}
@@ -414,7 +414,7 @@ int main(int argc, char **argv)
 			   "-t, --terminate     terminates daemon\n\n");
 
 		close_socket();
-		printf("closed socket\n");
+		//printf("closed socket\n");
 
 		return 0;
 	}
@@ -422,7 +422,7 @@ int main(int argc, char **argv)
 	printf("Invalid command.\n");
 
 	close_socket();
-	printf("closed socket\n");
+	//printf("closed socket\n");
 
 	return 0;
 }

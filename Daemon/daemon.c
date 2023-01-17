@@ -210,7 +210,7 @@ _Noreturn int run_daemon()
 
             syslog(LOG_NOTICE, "Daemon processed instructions.\n");
 
-            char response[1024];
+            char response[1024]= "";
 
             if(current_request->id == ADD)
             {
