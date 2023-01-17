@@ -1,4 +1,5 @@
 #ifndef DAEMON_H
+#define DAEMON_H
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -14,5 +15,7 @@
 #include <errno.h>
 
 #include "../Shared/shared.h"
+#include "analyzer.h"
+#include "task_manager.h"
 
 #endif // DAEMON_H
