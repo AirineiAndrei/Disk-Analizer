@@ -1,5 +1,5 @@
 CC := gcc
-CFLAGS :=
+CFLAGS := -pthread
 LINKER = gcc
 
 SRCDIR   = .

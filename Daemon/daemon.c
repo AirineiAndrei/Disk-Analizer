@@ -83,7 +83,7 @@ static void skeleton_daemon()
 }
 
 struct request_details * get_request_details(const char *const buff){
-    struct request_details * incoming_request = malloc(sizeof(* incoming_request));
+    struct request_details * incoming_request = (struct request_details*)malloc(sizeof(struct request_details));
 
     if(sscanf(buff, "ID %d\n", &incoming_request->id) == 1)
     {
@@ -124,7 +124,6 @@ _Noreturn int run_daemon()
 
     while (1)
     {
-
         int ConnectFD = accept(SocketFD, NULL, NULL);
 
         if (ConnectFD == -1)
@@ -181,8 +180,25 @@ _Noreturn int run_daemon()
             if(current_request->id == ADD)
             {
                 // add task
-
                 syslog(LOG_NOTICE, "ADD task is: %d, %s\n", current_request->priority, current_request->path);
+                int current_task_id = get_new_task_id();
+                if(current_task_id != -1)
+                {
+                    // We start this task
+                    struct task_details* current_task = (struct task_details*) malloc(sizeof(struct task_details));
+                    current_task->task_id = current_task_id;
+                    current_task->status = PENDING;
+                    current_task->priority = current_request->priority;
+                    for(int i=0;i<MAX_PATH_LENGTH;i++)
+                        current_task->path[i] = current_request->path[i];
+                    
+                    if ( pthread_create (get_task_thread(current_task_id) , NULL , analyze , current_task)) {
+                        perror ("da_daemon cannot create thread");
+                        exit(-1);
+                    }
+                    syslog(LOG_NOTICE, "TASK with id: %d thread created\n", current_task_id);
+                }
+                // TO DO: send back the task id to da / a message if we can not start another task
             }
 
             if(current_request->id == SUSPEND || current_request->id == RESUME || current_request->id == REMOVE)
@@ -240,8 +256,6 @@ _Noreturn int run_daemon()
         }
 
         close(ConnectFD);
-
-        sleep(2);
     }
 
     syslog(LOG_NOTICE, "The da_daemon terminated.");
@@ -254,6 +268,7 @@ int main()
 
     skeleton_daemon();
     create_socket();
+    init_task_manager();
 
     int error = run_daemon();
 

@@ -1,0 +1,6 @@
+#!/bin/bash
+# call this script with sudo to freshly compile the daemon and da and start the daemon
+make remove
+pkill da_daemon
+make install
+da_daemon

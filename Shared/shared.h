@@ -25,10 +25,10 @@ struct request_details{
 #define PROCESSING 2
 #define PAUSED 3
 #define DONE 4
-#define REMOVED 5;
+#define REMOVED 5
 
 struct task_details{
-    int task_id, status, priority, worker_id;
+    int task_id, status, priority;
     char path[MAX_PATH_LENGTH];
 };
 

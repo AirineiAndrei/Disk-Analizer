@@ -3,6 +3,9 @@
         "fcntl.h": "c",
         "unistd.h": "c",
         "analyzer.h": "c",
-        "shared.h": "c"
+        "shared.h": "c",
+        "syslog.h": "c",
+        "socket.h": "c",
+        "task_manager.h": "c"
     }
 }

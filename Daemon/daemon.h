@@ -13,6 +13,7 @@
 #include <arpa/inet.h>
 #include <string.h>
 #include <errno.h>
+#include<pthread.h>
 
 #include "../Shared/shared.h"
 #include "analyzer.h"
