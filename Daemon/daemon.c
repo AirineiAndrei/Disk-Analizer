@@ -72,11 +72,8 @@ void open_return_socket()
 
 void return_response(const char *const buffer)
 {
+    open_return_socket();
     write(returnFD, buffer, strlen(buffer));
-}
-
-void close_return_socket()
-{
     close(returnFD);
 }
 
@@ -161,8 +158,6 @@ _Noreturn int run_daemon()
     while (1)
     {
         int ConnectFD = accept(SocketFD, NULL, NULL);
-
-        open_return_socket();
 
         if (ConnectFD == -1)
         {
@@ -259,16 +254,21 @@ _Noreturn int run_daemon()
                     // TO DO: send appropriate messages in case the suspend is not valid
                     switch(get_task_status(id)){
                     case PENDING:
+                        return_response("Task doesn't exit");
                         break;
                     case PROCESSING:
                         suspend_task(id);
+                        return_response("Task paused succesfully");
                         break;
                     case PAUSED:
+                        return_response("Task already paused");
                         break;
                     case DONE:
+                        return_response("Task is already done");
                         break;
                     case PRIORITY_WAITING:
                         suspend_task(id);
+                        return_response("Task paused succesfully");
                         break;
                     }
                 }
@@ -343,7 +343,7 @@ _Noreturn int run_daemon()
             close(SocketFD);
             exit(EXIT_FAILURE);
         }
-        close_return_socket();
+        
         close(ConnectFD);
     }
 

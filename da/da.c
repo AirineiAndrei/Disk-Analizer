@@ -99,6 +99,37 @@ void send_request(const char *const buff, const int size)
 	write(SocketFD, buff, size);
 }
 
+void print_daemon_response()
+{
+	//	 da reads response from Daemon here
+	while(1)
+	{
+		int ConnectFD = accept(returnFD, NULL, NULL);
+
+		if (ConnectFD == -1)
+		{
+			perror("accept failed");
+			close_socket();
+			exit(EXIT_FAILURE);
+		}
+
+		char response[1024];
+
+		int nr_read = read(ConnectFD, response, 1024);
+
+		if(nr_read < 1)
+		{
+			perror("return read failed");
+			close_socket();
+			exit(EXIT_FAILURE);
+		}
+
+		printf("%s", response);
+
+		break;
+	}
+}
+
 int main(int argc, char **argv)
 {
 	create_return_socket();
@@ -155,33 +186,7 @@ int main(int argc, char **argv)
 		sprintf(instructions, "ID %d\nPRIORITY %d\nPATH %s\n", ADD, priority, path);
 		send_request(instructions, strlen(instructions));
 
-		//	 da reads response from Daemon here
-		while(1)
-		{
-			int ConnectFD = accept(returnFD, NULL, NULL);
-
-			if (ConnectFD == -1)
-			{
-				perror("accept failed");
-				close_socket();
-				exit(EXIT_FAILURE);
-			}
-
-			char response[512];
-			int size = 512;
-			int nr_read = read(ConnectFD, response, size);
-
-			if(nr_read < 1)
-			{
-				perror("return read failed");
-				close_socket();
-				exit(EXIT_FAILURE);
-			}
-
-			printf("%s", response);
-
-			break;
-		}
+		print_daemon_response();
 
 		close_socket();
 		printf("closed socket\n");
