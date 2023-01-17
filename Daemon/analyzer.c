@@ -30,14 +30,14 @@ void* analyze(void* info)
     FILE * out_fd = fopen(output_path, "w");
     syslog(LOG_NOTICE,"Output path is %s",output_path);
 
-    write_report(current_task->path,"./",out_fd,total_size);
+    write_report(current_task->path,"/",out_fd,total_size,0);
 
     fclose(out_fd);
     
     return NULL;
 }
 
-long long write_report(const char *path,const char* relative_path, FILE * out_fd, int total_size)
+long long write_report(const char *path,const char* relative_path, FILE * out_fd, int total_size,int depth)
 {
     DIR *dir = opendir(path);
     if(dir == NULL) 
@@ -60,14 +60,18 @@ long long write_report(const char *path,const char* relative_path, FILE * out_fd
 
             // if(sub_dir->d_type != 4)// just in case we want to consider only containing files
             size += (long long)fsize(sub_path);
-            size += write_report(sub_path,sub_relative_path,out_fd,total_size);
+            size += write_report(sub_path,sub_relative_path,out_fd,total_size,depth+1);
         }
     }
     closedir(dir);
 
     double percent = (double) size / (double) total_size * 100;
 
-    fprintf(out_fd,"|-%s %f%% %lldB \n",relative_path,percent,size);
+    char show_depth[MAX_PATH_LENGTH] = "";
+    for(int i = 0;i<2*depth;i++)
+        show_depth[i] = ' ';
+
+    fprintf(out_fd,"%s|-%s %f%% %lldB \n",show_depth,relative_path,percent,size);
     // size is the size of this subdir
     return size;
 }

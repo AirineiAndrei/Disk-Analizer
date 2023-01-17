@@ -17,6 +17,6 @@ off_t fsize(const char *filename);
 
 long long dfs_find_size_on_disk(const char *path);
 
-long long write_report(const char *path,const char* relative_path, FILE * out_fd, int total_size);
+long long write_report(const char *path,const char* relative_path, FILE * out_fd, int total_size,int depth);
 
 #endif // ANALYZER_H
