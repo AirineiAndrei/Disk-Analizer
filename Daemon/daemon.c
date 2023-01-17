@@ -1,7 +1,7 @@
 #include "daemon.h"
 
-int SocketFD;
-struct sockaddr_in sa;
+int SocketFD, returnFD;
+struct sockaddr_in sa, return_sa;
 static struct request_details *current_request = NULL;
 
 void create_socket()
@@ -42,6 +42,42 @@ void create_socket()
     }
 
 
+}
+
+void open_return_socket()
+{
+	returnFD = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP);
+
+	if (returnFD == -1)
+	{
+		syslog(LOG_ERR, "The da_daemon: cannot create return socket. Error: %s\n", strerror(errno));
+        exit(EXIT_FAILURE);
+	}
+
+	memset(&return_sa, 0, sizeof return_sa);
+
+	return_sa.sin_family = AF_INET;
+	return_sa.sin_port = htons(1200);
+	return_sa.sin_addr.s_addr = 0;
+
+	if (connect(returnFD, (struct sockaddr *)&return_sa, sizeof return_sa) == -1)
+	{
+		syslog(LOG_ERR, "The da_daemon: cannot connect to return socket. Error: %s\n", strerror(errno));
+		close(returnFD);
+		exit(EXIT_FAILURE);
+	}
+
+	syslog(LOG_NOTICE, "The da_daemon connected to return socket.");
+}
+
+void return_response(const char *const buffer, const int size)
+{
+    write(returnFD, buffer, size);
+}
+
+void close_return_socket()
+{
+    close(returnFD);
 }
 
 static void skeleton_daemon()
@@ -126,6 +162,8 @@ _Noreturn int run_daemon()
     {
         int ConnectFD = accept(SocketFD, NULL, NULL);
 
+        open_return_socket();
+
         if (ConnectFD == -1)
         {
             syslog(LOG_ERR, "The da_daemon: accept failed. Error: %s\n", strerror(errno));
@@ -177,6 +215,8 @@ _Noreturn int run_daemon()
 
             syslog(LOG_NOTICE, "Daemon processed instructions.\n");
 
+            char response[512];
+
             if(current_request->id == ADD)
             {
                 // add task
@@ -197,8 +237,16 @@ _Noreturn int run_daemon()
                         exit(-1);
                     }
                     syslog(LOG_NOTICE, "TASK with id: %d thread created\n", current_task_id);
+
+                    sprintf(response, "added path done\n");
                 }
                 // TO DO: send back the task id to da / a message if we can not start another task
+                else
+                    sprintf(response, "added path failed\n");
+
+                return_response(response, strlen(response));
+
+                close_return_socket();
             }
 
             if(current_request->id == SUSPEND || current_request->id == RESUME || current_request->id == REMOVE)
