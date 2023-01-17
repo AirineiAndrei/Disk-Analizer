@@ -113,7 +113,7 @@ void print_daemon_response()
 			exit(EXIT_FAILURE);
 		}
 
-		char response[1024];
+		char response[1024]="";
 
 		int nr_read = read(ConnectFD, response, 1024);
 
