@@ -11,8 +11,8 @@ $(RECURSE_TARGET):
 # Install the daemon and the da executable in the system
 # Needs sudo 
 install: all
-	cp ./Daemon/bin/daemon /usr/local/bin
-	chmod +x /usr/local/bin/daemon
+	cp ./Daemon/bin/da_daemon /usr/local/bin
+	chmod +x /usr/local/bin/da_daemon
 
 	cp ./da/bin/da /usr/local/bin
 	chmod +x /usr/local/bin/da

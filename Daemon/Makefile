@@ -7,7 +7,7 @@ OBJDIR   = ./obj
 BINDIR   = ./bin
 SHAREDDIR = ./../Shared
 
-TARGET   = daemon
+TARGET   = da_daemon
 
 SOURCES  := $(wildcard $(SRCDIR)/*.c)
 INCLUDES := $(wildcard $(SRCDIR)/*.h)
