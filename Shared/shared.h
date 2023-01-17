@@ -32,4 +32,7 @@ struct task_details{
     char path[MAX_PATH_LENGTH];
 };
 
+#include <string.h>
+void add_to_path(const char* current_path,const char* add_path,char *ans);
+
 #endif // DISKANALYZER_SHARED_H
