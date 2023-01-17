@@ -14,7 +14,7 @@ void* analyze(void* info)
 {
     struct task_details* current_task = (struct task_details*) info;
     syslog(LOG_NOTICE,"Starting analyzing job from  %s\n", current_task->path);
-    int total_size = dfs_find_size_on_disk(current_task->path); // Need this to estimate progress
+    int total_size = dfs_find_size_on_disk(current_task->path,current_task->task_id); // Need this to estimate progress
     syslog(LOG_NOTICE,"Total size of %s task id %d is %d\n", current_task->path,current_task->task_id,total_size);
 
     char output_path[MAX_PATH_LENGTH];
@@ -30,15 +30,17 @@ void* analyze(void* info)
     FILE * out_fd = fopen(output_path, "w");
     syslog(LOG_NOTICE,"Output path is %s",output_path);
 
-    write_report(current_task->path,"/",out_fd,total_size,0);
+    write_report(current_task->path,"/",out_fd,total_size,0,current_task->task_id);
 
     fclose(out_fd);
+    syslog(LOG_NOTICE,"Job %d done\n", current_task->task_id);
     
     return NULL;
 }
 
-long long write_report(const char *path,const char* relative_path, FILE * out_fd, int total_size,int depth)
+long long write_report(const char *path,const char* relative_path, FILE * out_fd, int total_size,int depth,int task_id)
 {
+    permission_to_continue(task_id);
     DIR *dir = opendir(path);
     if(dir == NULL) 
     {
@@ -58,9 +60,9 @@ long long write_report(const char *path,const char* relative_path, FILE * out_fd
             add_to_path(path,sub_dir->d_name,sub_path);
             add_to_path(relative_path,sub_dir->d_name,sub_relative_path);
 
-            // if(sub_dir->d_type != 4)// just in case we want to consider only containing files
+            // if(sub_dir->d_type != 4)// just in case we want to consider only containing files not folder size (4096)
             size += (long long)fsize(sub_path);
-            size += write_report(sub_path,sub_relative_path,out_fd,total_size,depth+1);
+            size += write_report(sub_path,sub_relative_path,out_fd,total_size,depth+1,task_id);
         }
     }
     closedir(dir);
@@ -76,8 +78,9 @@ long long write_report(const char *path,const char* relative_path, FILE * out_fd
     return size;
 }
 
-long long dfs_find_size_on_disk(const char *path)
+long long dfs_find_size_on_disk(const char *path,int task_id)
 {
+    permission_to_continue(task_id);
     // syslog(LOG_NOTICE,"DFS in %s\n", path);
     DIR *dir = opendir(path);
     if(dir == NULL) 
@@ -96,7 +99,7 @@ long long dfs_find_size_on_disk(const char *path)
             add_to_path(path,sub_dir->d_name,sub_path);
             // if(sub_dir->d_type != 4)// just in case we want to consider only containing files
             size += (long long)fsize(sub_path);
-            size += dfs_find_size_on_disk(sub_path);
+            size += dfs_find_size_on_disk(sub_path,task_id);
         }
     }
 

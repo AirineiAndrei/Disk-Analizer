@@ -187,10 +187,12 @@ _Noreturn int run_daemon()
                     // We start this task
                     struct task_details* current_task = (struct task_details*) malloc(sizeof(struct task_details));
                     current_task->task_id = current_task_id;
-                    current_task->status = PENDING;
+                    current_task->status = PROCESSING;
                     current_task->priority = current_request->priority;
                     for(int i=0;i<MAX_PATH_LENGTH;i++)
                         current_task->path[i] = current_request->path[i];
+                    
+                    set_task_details(current_task);
                     
                     if ( pthread_create (get_task_thread(current_task_id) , NULL , analyze , current_task)) {
                         perror ("da_daemon cannot create thread");
@@ -203,8 +205,30 @@ _Noreturn int run_daemon()
 
             if(current_request->id == SUSPEND || current_request->id == RESUME || current_request->id == REMOVE)
             {
-                // modify task status
                 syslog(LOG_NOTICE, "SRR task received\n");
+                // modify task status
+                if(current_request->id == SUSPEND)
+                {
+                    int id = current_request->arg_pid;
+                    syslog(LOG_NOTICE, "Suspend: %d",id);
+                
+                    // TO DO: send appropriate messages in case the suspend is not valid
+                    switch(get_task_status(id)){
+                    case PENDING:
+                        break;
+                    case PROCESSING:
+                        suspend_task(id);
+                        break;
+                    case PAUSED:
+                        break;
+                    case DONE:
+                        break;
+                    case PRIORITY_WAITING:
+                        suspend_task(id);
+                        break;
+                    }
+                }
+                
             }
 
             if(current_request->id == INFO)
