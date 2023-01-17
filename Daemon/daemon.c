@@ -281,15 +281,20 @@ _Noreturn int run_daemon()
                     // TO DO: send appropriate messages in case the suspend is not valid
                     switch(get_task_status(id)){
                     case PENDING:
+                        return_response("Task doesn't exit\n");
                         break;
                     case PROCESSING:
+                        return_response("Task not paused\n");
                         break;
                     case PAUSED:
                         resume_task(id);
+                        return_response("Task resumed\n");
                         break;
                     case DONE:
+                        return_response("Task not paused\n");
                         break;
                     case PRIORITY_WAITING:
+                        return_response("Task not paused\n");
                         break;
                     }
                 }
