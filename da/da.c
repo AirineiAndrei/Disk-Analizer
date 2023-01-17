@@ -1,7 +1,45 @@
 #include "da.h"
 
-struct sockaddr_in sa;
-int SocketFD;
+int SocketFD, returnFD;
+struct sockaddr_in sa, return_sa;
+
+void create_return_socket()
+{
+    returnFD = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP);
+    if (returnFD == -1)
+    {
+        perror("cannot create return socket");
+        exit(EXIT_FAILURE);
+    }
+
+    if (setsockopt(returnFD, SOL_SOCKET, SO_REUSEADDR, &(int) {1}, sizeof(int)) == -1)
+    {
+		perror("cannot reuse address socket");
+        exit(EXIT_FAILURE);
+    }
+
+    memset(&return_sa, 0, sizeof return_sa);
+
+    return_sa.sin_family = AF_INET;
+    return_sa.sin_port = htons(1200);
+    return_sa.sin_addr.s_addr = htonl(INADDR_ANY);
+
+    if (bind(returnFD, (struct sockaddr *)&return_sa, sizeof return_sa) == -1)
+    {
+        perror("bind failed");
+        close(returnFD);
+        exit(EXIT_FAILURE);
+    }
+
+    if (listen(returnFD, 10) == -1)
+    {
+		perror("listen failed");
+        close(returnFD);
+        exit(EXIT_FAILURE);
+    }
+
+
+}
 
 void open_socket()
 {
@@ -9,7 +47,7 @@ void open_socket()
 
 	if (SocketFD == -1)
 	{
-		perror("cannot create socket");
+		perror("cannot open socket");
 		exit(EXIT_FAILURE);
 	}
 
@@ -34,6 +72,7 @@ void open_socket()
 void close_socket()
 {
 	close(SocketFD);
+	close(returnFD);
 }
 
 int check_error_strtol(const char *nptr, char *endptr, long int n)
@@ -62,8 +101,8 @@ void send_request(const char *const buff, const int size)
 
 int main(int argc, char **argv)
 {
-
-	open_socket(); // TODO close socket
+	create_return_socket();
+	open_socket(); // TODO close sock
 	printf("opened socket\n");
 
 	if (argc == 1)
@@ -115,6 +154,34 @@ int main(int argc, char **argv)
 
 		sprintf(instructions, "ID %d\nPRIORITY %d\nPATH %s\n", ADD, priority, path);
 		send_request(instructions, strlen(instructions));
+
+		//	 da reads response from Daemon here
+		while(1)
+		{
+			int ConnectFD = accept(returnFD, NULL, NULL);
+
+			if (ConnectFD == -1)
+			{
+				perror("accept failed");
+				close_socket();
+				exit(EXIT_FAILURE);
+			}
+
+			char response[512];
+			int size = 512;
+			int nr_read = read(ConnectFD, response, size);
+
+			if(nr_read < 1)
+			{
+				perror("return read failed");
+				close_socket();
+				exit(EXIT_FAILURE);
+			}
+
+			printf("%s", response);
+
+			break;
+		}
 
 		close_socket();
 		printf("closed socket\n");
