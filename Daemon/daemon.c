@@ -70,9 +70,9 @@ void open_return_socket()
 	syslog(LOG_NOTICE, "The da_daemon connected to return socket.");
 }
 
-void return_response(const char *const buffer, const int size)
+void return_response(const char *const buffer)
 {
-    write(returnFD, buffer, size);
+    write(returnFD, buffer, strlen(buffer));
 }
 
 void close_return_socket()
@@ -215,7 +215,7 @@ _Noreturn int run_daemon()
 
             syslog(LOG_NOTICE, "Daemon processed instructions.\n");
 
-            char response[512];
+            char response[1024];
 
             if(current_request->id == ADD)
             {
@@ -239,16 +239,12 @@ _Noreturn int run_daemon()
                         exit(-1);
                     }
                     syslog(LOG_NOTICE, "TASK with id: %d thread created\n", current_task_id);
-
-                    sprintf(response, "added path done\n");
+                    sprintf(response,"Created analysis task with ID %d for %s and priority %d \n",current_task_id,current_task->path,current_task->priority);
+                    return_response(response);
                 }
                 // TO DO: send back the task id to da / a message if we can not start another task
                 else
-                    sprintf(response, "added path failed\n");
-
-                return_response(response, strlen(response));
-
-                close_return_socket();
+                    return_response("The daemon cant take more tasks\n");
             }
 
             if(current_request->id == SUSPEND || current_request->id == RESUME || current_request->id == REMOVE)
@@ -273,6 +269,27 @@ _Noreturn int run_daemon()
                         break;
                     case PRIORITY_WAITING:
                         suspend_task(id);
+                        break;
+                    }
+                }
+
+                if(current_request->id == RESUME)
+                {
+                    int id = current_request->arg_pid;
+                    syslog(LOG_NOTICE, "Resume: %d",id);
+                
+                    // TO DO: send appropriate messages in case the suspend is not valid
+                    switch(get_task_status(id)){
+                    case PENDING:
+                        break;
+                    case PROCESSING:
+                        break;
+                    case PAUSED:
+                        resume_task(id);
+                        break;
+                    case DONE:
+                        break;
+                    case PRIORITY_WAITING:
                         break;
                     }
                 }
@@ -326,7 +343,7 @@ _Noreturn int run_daemon()
             close(SocketFD);
             exit(EXIT_FAILURE);
         }
-
+        close_return_socket();
         close(ConnectFD);
     }
 
