@@ -254,21 +254,21 @@ _Noreturn int run_daemon()
                     // TO DO: send appropriate messages in case the suspend is not valid
                     switch(get_task_status(id)){
                     case PENDING:
-                        return_response("Task doesn't exit");
+                        return_response("Task doesn't exit\n");
                         break;
                     case PROCESSING:
                         suspend_task(id);
-                        return_response("Task paused succesfully");
+                        return_response("Task paused succesfully\n");
                         break;
                     case PAUSED:
-                        return_response("Task already paused");
+                        return_response("Task already paused\n");
                         break;
                     case DONE:
-                        return_response("Task is already done");
+                        return_response("Task is already done\n");
                         break;
                     case PRIORITY_WAITING:
                         suspend_task(id);
-                        return_response("Task paused succesfully");
+                        return_response("Task paused succesfully\n");
                         break;
                     }
                 }
@@ -343,7 +343,7 @@ _Noreturn int run_daemon()
             close(SocketFD);
             exit(EXIT_FAILURE);
         }
-        
+
         close(ConnectFD);
     }
 

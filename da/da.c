@@ -220,6 +220,8 @@ int main(int argc, char **argv)
 		sprintf(instructions, "ID %d\nPID %d\n", SUSPEND, pid);
 		send_request(instructions, strlen(instructions));
 
+		print_daemon_response();
+
 		close_socket();
 		printf("closed socket\n");
 
