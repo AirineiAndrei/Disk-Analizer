@@ -68,3 +68,9 @@ void resume_task(int task_id)
     set_task_status(task_id,PRIORITY_WAITING);
     pthread_mutex_unlock(&permission[task_id]);
 }
+
+void notify_task_done(int task_id)
+{   
+    syslog(LOG_NOTICE,"Job %d done\n", task_id);
+    set_task_status(task_id,DONE);
+}

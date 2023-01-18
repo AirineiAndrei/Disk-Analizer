@@ -33,7 +33,8 @@ void* analyze(void* info)
     write_report(current_task->path,"/",out_fd,total_size,0,current_task->task_id);
 
     fclose(out_fd);
-    syslog(LOG_NOTICE,"Job %d done\n", current_task->task_id);
+
+    notify_task_done(current_task->task_id);
     
     return NULL;
 }

@@ -28,4 +28,6 @@ void suspend_task(int task_id);
 
 void resume_task(int task_id);
 
+void notify_task_done(int task_id);
+
 #endif // TASK_MANAGER_H
