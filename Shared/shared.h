@@ -28,6 +28,8 @@ struct request_details{
 #define DONE 4
 #define PRIORITY_WAITING 5
 
+#define OUT_DIRECTORY "/tmp/da_daemon/"
+
 struct task_details{
     int task_id, status, priority;
     char path[MAX_PATH_LENGTH];

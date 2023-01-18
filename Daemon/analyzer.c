@@ -8,7 +8,7 @@ off_t fsize(const char *filename) {
 
     return -1; 
 }
-const char *out_directory = "/tmp/da_daemon/";
+const char *out_directory = OUT_DIRECTORY;
 
 void* analyze(void* info)
 {
