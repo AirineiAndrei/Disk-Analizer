@@ -57,16 +57,17 @@ void permission_to_continue(int task_id)
     pthread_mutex_unlock(&permission[task_id]);
 }
 
-void suspend_task(int task_id)
+void suspend_task(int task_id,int pause_type)
 {
-    set_task_status(task_id,PAUSED);
+    assert(pause_type == PAUSED || pause_type == PRIORITY_WAITING);
+    set_task_status(task_id,pause_type);
     pthread_mutex_lock(&permission[task_id]);
 }
 
 void resume_task(int task_id)
 {
+    // task manager will resume this task if it has high enough priority
     set_task_status(task_id,PRIORITY_WAITING);
-    pthread_mutex_unlock(&permission[task_id]);
 }
 
 void notify_task_done(int task_id)

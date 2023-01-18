@@ -257,7 +257,7 @@ _Noreturn int run_daemon()
                         return_response("Task doesn't exit\n");
                         break;
                     case PROCESSING:
-                        suspend_task(id);
+                        suspend_task(id,PAUSED);
                         return_response("Task paused succesfully\n");
                         break;
                     case PAUSED:
@@ -267,7 +267,7 @@ _Noreturn int run_daemon()
                         return_response("Task is already done\n");
                         break;
                     case PRIORITY_WAITING:
-                        suspend_task(id);
+                        suspend_task(id,PAUSED);
                         return_response("Task paused succesfully\n");
                         break;
                     }

@@ -5,6 +5,7 @@
 
 #define MAX_TASKS 20
 
+#include <assert.h>
 #include <syslog.h>
 #include <stdlib.h>
 #include<pthread.h>
@@ -24,7 +25,7 @@ void permission_to_continue(int task_id);
 
 void set_task_details(struct task_details* info);
 
-void suspend_task(int task_id);
+void suspend_task(int task_id,int pause_type);
 
 void resume_task(int task_id);
 
