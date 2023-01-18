@@ -32,7 +32,6 @@ void set_task_status(int task_id,int new_task_status)
     pthread_mutex_lock(&status_mutex[task_id]);
     syslog(LOG_NOTICE,"Changed task: %d from %d to %d",task_id,task[task_id]->status,new_task_status);
     task[task_id]->status = new_task_status;
-    syslog(LOG_NOTICE, "New task status is: %d ",task[task_id]->status);
     pthread_mutex_unlock(&status_mutex[task_id]);
 }
 
@@ -60,8 +59,10 @@ void permission_to_continue(int task_id)
 void suspend_task(int task_id,int pause_type)
 {
     assert(pause_type == PAUSED || pause_type == PRIORITY_WAITING);
+    int current_status = get_task_status(task_id);
+    if(current_status != PAUSED && current_status != PRIORITY_WAITING)
+        pthread_mutex_lock(&permission[task_id]);
     set_task_status(task_id,pause_type);
-    pthread_mutex_lock(&permission[task_id]);
 }
 
 void resume_task(int task_id)
@@ -74,4 +75,37 @@ void notify_task_done(int task_id)
 {   
     syslog(LOG_NOTICE,"Job %d done\n", task_id);
     set_task_status(task_id,DONE);
+    priority_compute(); // check if we need to work on less important tasks
+}
+
+void priority_compute()
+{
+    syslog(LOG_NOTICE,"RECOMPUTING TASK PRIORITIES");
+    int max_priority = 0;
+    for(int i = 0; i < MAX_TASKS;i++)
+    {
+        int current_status = get_task_status(i);
+        if(current_status == PROCESSING || current_status == PRIORITY_WAITING)
+        {
+            if(task[i]->priority > max_priority)
+                max_priority = task[i]->priority;
+        }
+    }
+
+    for(int i = 0; i < MAX_TASKS;i++)
+    {
+        if(task[i]->priority == max_priority)
+        {
+            if(get_task_status(i) == PRIORITY_WAITING)
+            {
+                pthread_mutex_unlock(&permission[i]);
+                set_task_status(i,PROCESSING);
+            }
+        }
+        else
+        {
+            if(get_task_status(i) == PROCESSING)
+                suspend_task(i,PRIORITY_WAITING);
+        }
+    }
 }

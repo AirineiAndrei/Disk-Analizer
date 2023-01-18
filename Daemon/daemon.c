@@ -233,6 +233,7 @@ _Noreturn int run_daemon()
                         perror ("da_daemon cannot create thread");
                         exit(-1);
                     }
+                    suspend_task(current_task_id,PRIORITY_WAITING);
                     syslog(LOG_NOTICE, "TASK with id: %d thread created\n", current_task_id);
                     sprintf(response,"Created analysis task with ID %d for %s and priority %d \n",current_task_id,current_task->path,current_task->priority);
                     return_response(response);
@@ -350,6 +351,7 @@ _Noreturn int run_daemon()
         }
 
         close(ConnectFD);
+        priority_compute();
     }
 
     syslog(LOG_NOTICE, "The da_daemon terminated.");

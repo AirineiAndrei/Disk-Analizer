@@ -31,4 +31,6 @@ void resume_task(int task_id);
 
 void notify_task_done(int task_id);
 
+void priority_compute();
+
 #endif // TASK_MANAGER_H
