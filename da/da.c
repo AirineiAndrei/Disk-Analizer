@@ -101,40 +101,10 @@ void send_request(const char *const buff, const int size)
 
 void print_tmp(int task_id)
 {
-	FILE *fd;
-	char *line;
-	size_t len = 0;
-	ssize_t read;
+	char print_command[MAX_PATH_LENGTH];
+    snprintf(print_command, MAX_PATH_LENGTH, "tac /tmp/da_daemon/%d", task_id);
 
-	int nr_lines = 0;
-	//	sper sa nu avem nevoie de mai mult
-	char *lines[1024];
-
-	char input_path[MAX_PATH_LENGTH];
-    snprintf(input_path, MAX_PATH_LENGTH, "/tmp/da_daemon/%d", task_id);
-
-	fd = fopen(input_path, "r");
-	if(fd == NULL)
-		exit(EXIT_FAILURE);
-
-	while((read = getline(&line, &len, fd)) != -1)
-	{
-		lines[nr_lines] = malloc(sizeof(char) * len);
-		for(int i = 0; line[i] != '\0'; i++)
-			lines[nr_lines][i] = line[i];
-		nr_lines ++;
-	}
-
-	for(int i = nr_lines - 1; i >= 0; i--)
-	{
-		printf("%s", lines[i]);
-		free(lines[i]);
-	}
-
-	fclose(fd);
-
-	if(line)
-		free(line);
+	system(print_command);
 }
 
 void print_task_response(int task_id)
