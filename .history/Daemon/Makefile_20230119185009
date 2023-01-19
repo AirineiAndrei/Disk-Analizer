@@ -1,6 +1,6 @@
 CC := gcc
 CFLAGS := 
-LFLAGS := -pthread
+LIBS := -pthread
 LINKER = gcc
 
 SRCDIR   = .

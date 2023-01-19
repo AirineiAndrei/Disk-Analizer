@@ -1,6 +1,6 @@
 CC := gcc
 CFLAGS := 
-LFLAGS := -pthread
+LIBS := -pthread
 LINKER = gcc
 
 SRCDIR   = .
@@ -18,11 +18,11 @@ SHAREDOBJECTS := $(wildcard $(SHAREDDIR)/obj/*.o)
 rm		 = rm -fr
 
 $(BINDIR)/$(TARGET): $(OBJECTS)
-	@$(LINKER) $(OBJECTS) $(SHAREDOBJECTS) $(LFLAGS) -o $@ 
+	@$(LINKER) $(OBJECTS) $(SHAREDOBJECTS) $(LFLAGS) -o $@
 	@echo "Linking complete!"
 
 $(OBJECTS): $(OBJDIR)/%.o : $(SRCDIR)/%.c
-	@$(CC) $(CFLAGS) -c $< -o $@
+	@$(CC) $(CFLAGS) -c $< $(LIBS)  -o $@
 	@echo "Compiled "$<" successfully!"
 
 .PHONY: clean
