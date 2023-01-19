@@ -8,6 +8,7 @@
 #include <syslog.h>
 #include <dirent.h>
 #include <string.h>
+#include <math.h>
 #include "../Shared/shared.h"
 #include "task_manager.h"
 

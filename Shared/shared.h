@@ -30,6 +30,8 @@ struct request_details{
 
 #define OUT_DIRECTORY "/tmp/da_daemon/"
 
+#define MAX_HASHTAG 40
+
 struct task_details{
     int task_id, status, priority;
     char path[MAX_PATH_LENGTH];

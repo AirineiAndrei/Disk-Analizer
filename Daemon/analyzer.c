@@ -69,14 +69,40 @@ long long write_report(const char *path,const char* relative_path, FILE * out_fd
     closedir(dir);
 
     double percent = (double) size / (double) total_size * 100;
+    //  trebuie linkata o librarie pentru math. - lm, n am stiut unde sa o pun in makefile
+    // percent = round(percent * 100) / 100;
 
-    char show_depth[MAX_PATH_LENGTH] = "";
-    for(int i = 0;i<2*depth;i++)
-        show_depth[i] = ' ';
+    double print_size = (double) size / 1024;
+    // print_size = round(print_size * 100) / 100;
 
-    fprintf(out_fd,"%s|-%s %f%% %lldB \n",show_depth,relative_path,percent,size);
+    double max_hashtag = (double) MAX_HASHTAG;
+    int curent_hashtag = (int) (max_hashtag * percent / 100);
+    char hashtag[MAX_HASHTAG + 1] = "";
+    for(int i = 0; i < curent_hashtag; i++)
+        hashtag[i] = '#';
+
+    if(depth == 0)
+    {
+        fprintf(out_fd, "%s  %f%%  %fKB  %s\n", path, percent, print_size, hashtag);
+        fprintf(out_fd, "Path\tUsage\tSize\tAmount\n");
+    }
+    else if(depth == 1)
+    {
+        fprintf(out_fd, "|-%s  %f%%  %fKB  %s\n", relative_path, percent, print_size, hashtag);
+        fprintf(out_fd, "|\n");
+    }
+    else
+    {
+        fprintf(out_fd, "|-%s  %f%%  %fKB  %s\n", relative_path, percent, print_size, hashtag);
+    }
+
     // size is the size of this subdir
     return size;
+}
+
+void write_func(int depth)
+{
+    
 }
 
 long long dfs_find_size_on_disk(const char *path,int task_id)
