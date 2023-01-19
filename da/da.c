@@ -119,7 +119,7 @@ void print_tmp(int task_id)
 
 	while((read = getline(&line, &len, fd)) != -1)
 	{
-		lines[nr_lines] = malloc(sizeof(char) * 1024);
+		lines[nr_lines] = malloc(sizeof(char) * len);
 		for(int i = 0; line[i] != '\0'; i++)
 			lines[nr_lines][i] = line[i];
 		nr_lines ++;
