@@ -16,6 +16,8 @@ void init_task_manager();
 
 int prefix(const char *new_path, const char *old_path);
 
+struct task_details *get_task_info(int task_id);
+
 char *get_task_path(int task_id);
 
 int get_new_task_id(const char *new_path);

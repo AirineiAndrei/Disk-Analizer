@@ -107,6 +107,7 @@ void print_tmp(int task_id)
 	ssize_t read;
 
 	int nr_lines = 0;
+	//	sper sa nu avem nevoie de mai mult
 	char *lines[1024];
 
 	char input_path[MAX_PATH_LENGTH];
@@ -402,6 +403,8 @@ int main(int argc, char **argv)
 
 		sprintf(instructions, "ID %d\nPID %d\n", INFO, pid);
 		send_request(instructions, strlen(instructions));
+
+		print_daemon_response();
 
 		close_socket();
 		//printf("closed socket\n");

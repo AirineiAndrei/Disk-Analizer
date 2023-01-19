@@ -372,6 +372,34 @@ _Noreturn int run_daemon()
             {
                 // print info about a task
                 syslog(LOG_NOTICE, "INFO task received\n");
+
+                int id = current_request->arg_pid;
+
+                struct task_details* info = get_task_info(id);
+    
+                char response[1024]= "";
+
+                switch(info->status){
+                case PENDING:
+                    return_response("Task doesn't exist\n");
+                    break;
+                case PROCESSING:
+                    sprintf(response, "ID  Path  Priority  Done  Status\n%d  %s  %d  %0.2f%% processing\n", id, info->path, info->priority, (double)0);
+                    return_response(response);
+                    break;
+                case PAUSED:
+                    sprintf(response, "ID  Path  Priority  Done  Status\n%d  %s  %d  %0.2f%% paused\n", id, info->path, info->priority, (double)0);
+                    return_response(response);
+                    break;
+                case DONE:
+                    sprintf(response, "ID  Path  Priority  Done  Status\n%d  %s  %d  %0.2f%% done\n", id, info->path, info->priority, (double)0);
+                    return_response(response);
+                    break;
+                case PRIORITY_WAITING:
+                    sprintf(response, "ID  Path  Priority  Done  Status\n%d  %s  %d  %0.2f%% priotiry_waiting\n", id, info->path, info->priority, (double)0);
+                    return_response(response);
+                    break;
+                }
             }
 
             if(current_request->id == LIST)

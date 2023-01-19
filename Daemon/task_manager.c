@@ -21,6 +21,11 @@ int prefix(const char *new_path, const char *old_path)
     return strncmp(new_path, old_path, strlen(old_path)) == 0;
 }
 
+struct task_details *get_task_info(int task_id)
+{
+    return task[task_id];
+}
+
 char *get_task_path(int task_id)
 {
     return task[task_id]->path; 
