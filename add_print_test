@@ -1,0 +1,7 @@
+#!/bin/bash
+
+da -a $(pwd)
+da -i 0
+sleep 1 # wait a lil
+da -i 0
+da -p 0

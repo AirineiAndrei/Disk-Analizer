@@ -1,0 +1,8 @@
+#!/bin/bash
+
+da -a ~
+da -S 0
+da -r 0
+da -i 0
+da -a ~
+da -i 0

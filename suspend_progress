@@ -1,0 +1,10 @@
+#!/bin/bash
+
+da -a /home/cristi5 -p 2
+N = 4
+for i in $(seq 1 1 50)
+do
+    da -i 0
+    sleep 0.1
+done
+
