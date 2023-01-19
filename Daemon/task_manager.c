@@ -86,9 +86,39 @@ void suspend_task(int task_id,int pause_type)
 void resume_task(int task_id)
 {
     // task manager will resume this task if it has high enough priority
+
     set_task_status(task_id,PRIORITY_WAITING);
 }
 
+void remove_task(int task_id)
+{
+    if(get_task_status(task_id) != DONE)
+    {
+        if(pthread_cancel(*get_task_thread(task_id)))
+        {
+            syslog(LOG_ERR, "The da_daemon: cancel thread with ID: %d failed. Error: %s\n",task_id, strerror(errno));
+            exit(EXIT_FAILURE);
+        }
+
+        void *res;
+        if(pthread_join(*get_task_thread(task_id), &res))
+        {
+            syslog(LOG_ERR, "The da_daemon: joined thread with ID: %d failed. Error: %s\n",task_id, strerror(errno));
+            exit(EXIT_FAILURE);
+        }
+
+        if(res == PTHREAD_CANCELED)
+            syslog(LOG_ERR, "The da_daemon: cancel thread with ID: %d done.\n",task_id);
+        else
+        {
+            syslog(LOG_ERR, "The da_daemon: joined thread with ID: %d failed. Error: %s\n",task_id, strerror(errno));
+            exit(EXIT_FAILURE);
+        }
+    }
+
+    //  this task can take new work
+    set_task_status(task_id, PENDING);
+}
 void notify_task_done(int task_id)
 {   
     syslog(LOG_NOTICE,"Job %d done\n", task_id);

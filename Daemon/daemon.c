@@ -324,7 +324,46 @@ _Noreturn int run_daemon()
 
                 if(current_request->id == REMOVE)
                 {
+                    int id = current_request->arg_pid;
 
+                    char response[1024]= "";
+
+                    syslog(LOG_NOTICE, "Remove: %d",id);
+
+                    switch(get_task_status(id)){
+                    case PENDING:
+                        return_response("Task doesn't exit\n");
+                        break;
+                    case PROCESSING:
+                        remove_task(id);
+                        syslog(LOG_NOTICE, "Removed analysis task with ID %d\n", id);
+            
+
+                        sprintf(response, "Removed analysis task with ID ’%d’, status ’processing’ for ’%s’\n", id, get_task_path(id));
+                        return_response(response);
+                        break;
+                    case PAUSED:
+                        remove_task(id);
+                        syslog(LOG_NOTICE, "Removed analysis task with ID %d\n", id);
+
+                        sprintf(response, "Removed analysis task with ID ’%d’, status ’paused’ for ’%s’\n", id, get_task_path(id));
+                        return_response(response);
+                        break;
+                    case DONE:
+                        remove_task(id);
+                        syslog(LOG_NOTICE, "Removed analysis task with ID %d\n", id);
+
+                        sprintf(response, "Removed analysis task with ID ’%d’, status ’done’ for ’%s’\n", id, get_task_path(id));
+                        return_response(response);
+                        break;
+                    case PRIORITY_WAITING:
+                        remove_task(id);
+                        syslog(LOG_NOTICE, "Removed analysis task with ID %d\n", id);
+
+                        sprintf(response, "Removed analysis task with ID ’%d’, status ’priority_waiting’ for ’%s’\n", id, get_task_path(id));
+                        return_response(response);
+                        break;
+                    }
                 }
                 
             }

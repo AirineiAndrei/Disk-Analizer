@@ -277,7 +277,7 @@ int main(int argc, char **argv)
 		char *endptr = NULL;
 		int pid = strtol(nptr, &endptr, 10);
 
-		if (check_error_strtol(nptr, endptr, pid) || pid < 1)
+		if (check_error_strtol(nptr, endptr, pid) || pid < 0)
 		{
 			printf("Invalid number.\n");
 			close_socket();
@@ -287,6 +287,8 @@ int main(int argc, char **argv)
 
 		sprintf(instructions, "ID %d\nPID %d\n", REMOVE, pid);
 		send_request(instructions, strlen(instructions));
+
+		print_daemon_response();
 
 		close_socket();
 		//printf("closed socket\n");
@@ -309,7 +311,7 @@ int main(int argc, char **argv)
 		char *endptr = NULL;
 		int pid = strtol(nptr, &endptr, 10);
 
-		if (check_error_strtol(nptr, endptr, pid) || pid < 1)
+		if (check_error_strtol(nptr, endptr, pid) || pid < 0)
 		{
 			printf("Invalid number.\n");
 			close_socket();
@@ -361,7 +363,7 @@ int main(int argc, char **argv)
 		char *endptr = NULL;
 		int pid = strtol(nptr, &endptr, 10);
 
-		if (check_error_strtol(nptr, endptr, pid) || pid < 1)
+		if (check_error_strtol(nptr, endptr, pid) || pid < 0)
 		{
 			printf("Invalid number.\n");
 			close_socket();

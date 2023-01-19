@@ -9,6 +9,7 @@
 #include <syslog.h>
 #include <stdlib.h>
 #include<pthread.h>
+#include<errno.h>
 #include "../Shared/shared.h"
 
 void init_task_manager();
@@ -32,6 +33,8 @@ void set_task_details(struct task_details* info);
 void suspend_task(int task_id,int pause_type);
 
 void resume_task(int task_id);
+
+void remove_task(int task_id);
 
 void notify_task_done(int task_id);
 
