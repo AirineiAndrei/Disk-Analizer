@@ -382,17 +382,16 @@ _Noreturn int run_daemon()
                 char response[1024]= "";
 
                 syslog(LOG_NOTICE, "INFO status: %d\n", info->status);
-
                 switch(info->status){
                 case PENDING:
                     return_response("Task doesn't exist.\n");
                     break;
                 case PROCESSING:
-                    sprintf(response, "ID  Path  Priority  Done  Status  Details\n%d  %s  %d  %0.2lf%%  processing.  %d files, %d dirs\n", id, info->path, get_task_priority(id), (double)0, get_task_files_no(id), get_task_dirs_no(id));
+                    sprintf(response, "ID  Path  Priority  Done  Status  Details\n%d  %s  %d  %0.2lf%%  processing.  %d files, %d dirs\n", id, info->path, get_task_priority(id), get_task_progress(id), get_task_files_no(id), get_task_dirs_no(id));
                     return_response(response);
                     break;
                 case PAUSED:
-                    sprintf(response, "ID  Path  Priority  Done  Status  Details\n%d  %s  %d  %0.2lf%%  processing.  %d files, %d dirs\n", id, info->path, get_task_priority(id), (double)0, get_task_files_no(id), get_task_dirs_no(id));
+                    sprintf(response, "ID  Path  Priority  Done  Status  Details\n%d  %s  %d  %0.2lf%%  processing.  %d files, %d dirs\n", id, info->path, get_task_priority(id), get_task_progress(id), get_task_files_no(id), get_task_dirs_no(id));
                     return_response(response);
                     break;
                 case DONE:

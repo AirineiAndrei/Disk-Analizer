@@ -115,8 +115,7 @@ long long write_report(const char *path, const char* relative_path, FILE * out_f
     {
         fprintf(out_fd, "|-%s  %0.2lf%%  %0.2lfKB  %s\n", relative_path, percent, print_size, hashtag);
     }
-
-    set_task_progress(task_id, (((double) *sum_size) / ((double) total_size)) * 100);
+    set_task_progress(task_id, (double)((((double) *sum_size) / ((double) total_size)) * 100));
 
     // size is the size of this subdir
     return size;
