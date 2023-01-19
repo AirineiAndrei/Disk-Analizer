@@ -75,7 +75,9 @@ long long write_report(const char *path,const char* relative_path, FILE * out_fd
 
     current_task->dirs ++;
 
-    long long actual_size = size + 4096;
+    long long actual_size = size;
+    if(depth != 0)
+        actual_size += 4096;
     double percent = (double) actual_size / (double) total_size * 100;
     double print_size = (double) actual_size / 1024;
 
