@@ -69,11 +69,7 @@ long long write_report(const char *path,const char* relative_path, FILE * out_fd
     closedir(dir);
 
     double percent = (double) size / (double) total_size * 100;
-    //  trebuie linkata o librarie pentru math. - lm, n am stiut unde sa o pun in makefile
-    // percent = round(percent * 100) / 100;
-
     double print_size = (double) size / 1024;
-    // print_size = round(print_size * 100) / 100;
 
     double max_hashtag = (double) MAX_HASHTAG;
     int curent_hashtag = (int) (max_hashtag * percent / 100);
@@ -83,17 +79,17 @@ long long write_report(const char *path,const char* relative_path, FILE * out_fd
 
     if(depth == 0)
     {
-        fprintf(out_fd, "%s  %f%%  %fKB  %s\n", path, percent, print_size, hashtag);
+        fprintf(out_fd, "%s  %0.2f%%  %0.2fKB  %s\n", path, percent, print_size, hashtag);
         fprintf(out_fd, "Path\tUsage\tSize\tAmount\n");
     }
     else if(depth == 1)
     {
-        fprintf(out_fd, "|-%s  %f%%  %fKB  %s\n", relative_path, percent, print_size, hashtag);
+        fprintf(out_fd, "|-%s  %0.2f%%  %0.2fKB  %s\n", relative_path, percent, print_size, hashtag);
         fprintf(out_fd, "|\n");
     }
     else
     {
-        fprintf(out_fd, "|-%s  %f%%  %fKB  %s\n", relative_path, percent, print_size, hashtag);
+        fprintf(out_fd, "|-%s  %0.2f%%  %0.2fKB  %s\n", relative_path, percent, print_size, hashtag);
     }
 
     // size is the size of this subdir
