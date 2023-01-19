@@ -141,6 +141,17 @@ struct request_details * get_request_details(const char *const buff){
                 syslog(LOG_ERR, "The da_daemon: request read failed. Error: %s\n", strerror(errno));
                 return NULL;
             }
+
+            if(incoming_request->arg_pid >= MAX_TASKS)
+            {
+                syslog(LOG_NOTICE, "Daemon received wrong task ID.\n");
+
+                char response[1024]= "";
+                sprintf(response, "The highest task ID is %d\n", MAX_TASKS - 1);
+                return_response(response);
+
+                return NULL;
+            }
         }
 
         
@@ -243,7 +254,7 @@ _Noreturn int run_daemon()
                     return_response("The daemon cant take more tasks\n");
                 else
                 {
-                    sprintf(response, "The task with ID %d contains this directory\n", -(current_task_id + 1));
+                    sprintf(response, "Directory ’%s’ is already included in analysis with ID ’%d’\n", current_request->path, -(current_task_id + 1));
                     return_response(response);
                 }
             }
@@ -255,15 +266,17 @@ _Noreturn int run_daemon()
                 if(current_request->id == SUSPEND)
                 {
                     int id = current_request->arg_pid;
+
                     syslog(LOG_NOTICE, "Suspend: %d",id);
                 
-                    // TO DO: send appropriate messages in case the suspend is not valid
                     switch(get_task_status(id)){
                     case PENDING:
                         return_response("Task doesn't exit\n");
                         break;
                     case PROCESSING:
                         suspend_task(id,PAUSED);
+
+                        syslog(LOG_NOTICE, "Paused analysis task with ID %d\n", id);
                         return_response("Task paused succesfully\n");
                         break;
                     case PAUSED:
@@ -274,6 +287,8 @@ _Noreturn int run_daemon()
                         break;
                     case PRIORITY_WAITING:
                         suspend_task(id,PAUSED);
+
+                        syslog(LOG_NOTICE, "Paused analysis task with ID %d\n", id);
                         return_response("Task paused succesfully\n");
                         break;
                     }
@@ -282,9 +297,9 @@ _Noreturn int run_daemon()
                 if(current_request->id == RESUME)
                 {
                     int id = current_request->arg_pid;
+
                     syslog(LOG_NOTICE, "Resume: %d",id);
-                
-                    // TO DO: send appropriate messages in case the suspend is not valid
+
                     switch(get_task_status(id)){
                     case PENDING:
                         return_response("Task doesn't exit\n");
@@ -294,6 +309,8 @@ _Noreturn int run_daemon()
                         break;
                     case PAUSED:
                         resume_task(id);
+
+                        syslog(LOG_NOTICE, "Resumed analysis task with ID %d\n", id);
                         return_response("Task resumed\n");
                         break;
                     case DONE:
@@ -303,6 +320,11 @@ _Noreturn int run_daemon()
                         return_response("Task not paused\n");
                         break;
                     }
+                }
+
+                if(current_request->id == REMOVE)
+                {
+
                 }
                 
             }

@@ -243,7 +243,7 @@ int main(int argc, char **argv)
 		char *endptr = NULL;
 		int pid = strtol(nptr, &endptr, 10);
 
-		if (check_error_strtol(nptr, endptr, pid) || pid < 1)
+		if (check_error_strtol(nptr, endptr, pid) || pid < 0)
 		{
 			printf("Invalid number.\n");
 			close_socket();
