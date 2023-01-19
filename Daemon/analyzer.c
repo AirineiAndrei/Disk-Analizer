@@ -14,8 +14,11 @@ void* analyze(void* info)
 {
     struct task_details* current_task = (struct task_details*) info;
     syslog(LOG_NOTICE,"Starting analyzing job from  %s\n", current_task->path);
-    int total_size = dfs_find_size_on_disk(current_task->path,current_task->task_id); // Need this to estimate progress
-    syslog(LOG_NOTICE,"Total size of %s task id %d is %d\n", current_task->path,current_task->task_id,total_size);
+
+
+
+    long long total_size = dfs_find_size_on_disk(current_task->path,current_task->task_id); // Need this to estimate progress
+    syslog(LOG_NOTICE,"Total size of %s task id %d is %lld\n", current_task->path,current_task->task_id,total_size);
 
     char output_path[MAX_PATH_LENGTH];
     snprintf(output_path, MAX_PATH_LENGTH, "/tmp/da_daemon/%d", current_task->task_id);
@@ -30,7 +33,7 @@ void* analyze(void* info)
     FILE * out_fd = fopen(output_path, "w");
     syslog(LOG_NOTICE,"Output path is %s",output_path);
 
-    write_report(current_task->path,"/",out_fd,total_size,0,current_task->task_id, current_task);
+    write_report(current_task->path,"/",out_fd,total_size,0,current_task->task_id);
 
     fclose(out_fd);
 
@@ -39,7 +42,7 @@ void* analyze(void* info)
     return NULL;
 }
 
-long long write_report(const char *path,const char* relative_path, FILE * out_fd, int total_size,int depth,int task_id, struct task_details* current_task)
+long long write_report(const char *path,const char* relative_path, FILE * out_fd, long long total_size,int depth, int task_id)
 {
     permission_to_continue(task_id);
     DIR *dir = opendir(path);
@@ -59,7 +62,9 @@ long long write_report(const char *path,const char* relative_path, FILE * out_fd
         if(!sub_dir)break;
 
         if(sub_dir->d_type == DT_REG)
-            current_task->files ++;
+        {
+            set_task_files_no(task_id, get_task_files_no(task_id) + 1);
+        }
             
         if (strcmp(sub_dir->d_name, ".") != 0 && strcmp(sub_dir->d_name, "..") != 0) {
 
@@ -68,18 +73,19 @@ long long write_report(const char *path,const char* relative_path, FILE * out_fd
 
             // if(sub_dir->d_type != 4)// just in case we want to consider only containing files not folder size (4096)
             size += (long long)fsize(sub_path);
-            size += write_report(sub_path,sub_relative_path,out_fd,total_size,depth+1,task_id, current_task);
+            size += write_report(sub_path,sub_relative_path,out_fd,total_size,depth + 1,task_id);
         }
     }
     closedir(dir);
 
-    current_task->dirs ++;
+
+    set_task_dirs_no(task_id, get_task_dirs_no(task_id) + 1);
 
     long long actual_size = size;
     if(depth != 0)
         actual_size += 4096;
-    double percent = (double) actual_size / (double) total_size * 100;
-    double print_size = (double) actual_size / 1024;
+    double percent = (((long double) actual_size) / ((long double) total_size)) * 100;
+    double print_size = ((long double) actual_size) / 1024;
 
     double max_hashtag = (double) MAX_HASHTAG;
     int curent_hashtag = (int) (max_hashtag * percent / 100);
@@ -104,11 +110,6 @@ long long write_report(const char *path,const char* relative_path, FILE * out_fd
 
     // size is the size of this subdir
     return size;
-}
-
-void write_func(int depth)
-{
-    
 }
 
 long long dfs_find_size_on_disk(const char *path,int task_id)

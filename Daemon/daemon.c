@@ -7,13 +7,13 @@ static struct request_details *current_request = NULL;
 void create_socket()
 {
     SocketFD = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP);
-    if (SocketFD == -1)
+    if(SocketFD == -1)
     {
         syslog(LOG_ERR, "The da_daemon: cannot create socket. Error: %s\n", strerror(errno));
         exit(EXIT_FAILURE);
     }
 
-    if (setsockopt(SocketFD, SOL_SOCKET, SO_REUSEADDR, &(int) {1}, sizeof(int)) == -1)
+    if(setsockopt(SocketFD, SOL_SOCKET, SO_REUSEADDR, &(int) {1}, sizeof(int)) == -1)
     {
         syslog(LOG_ERR, "The da_daemon: reuse address socket failed. Error: %s\n", strerror(errno));
         exit(EXIT_FAILURE);
@@ -27,20 +27,19 @@ void create_socket()
 
     syslog(LOG_NOTICE, "Socket address is: %d\n", sa.sin_addr.s_addr);
 
-    if (bind(SocketFD, (struct sockaddr *)&sa, sizeof sa) == -1)
+    if(bind(SocketFD, (struct sockaddr *)&sa, sizeof sa) == -1)
     {
         syslog(LOG_ERR, "The da_daemon: bind failed. Error: %s\n", strerror(errno));
         close(SocketFD);
         exit(EXIT_FAILURE);
     }
 
-    if (listen(SocketFD, 10) == -1)
+    if(listen(SocketFD, 10) == -1)
     {
         syslog(LOG_ERR, "The da_daemon: listen failed. Error: %s\n", strerror(errno));
         close(SocketFD);
         exit(EXIT_FAILURE);
     }
-
 
 }
 
@@ -48,7 +47,7 @@ void open_return_socket()
 {
 	returnFD = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP);
 
-	if (returnFD == -1)
+	if(returnFD == -1)
 	{
 		syslog(LOG_ERR, "The da_daemon: cannot create return socket. Error: %s\n", strerror(errno));
         exit(EXIT_FAILURE);
@@ -60,7 +59,7 @@ void open_return_socket()
 	return_sa.sin_port = htons(1200);
 	return_sa.sin_addr.s_addr = 0;
 
-	if (connect(returnFD, (struct sockaddr *)&return_sa, sizeof return_sa) == -1)
+	if(connect(returnFD, (struct sockaddr *)&return_sa, sizeof return_sa) == -1)
 	{
 		syslog(LOG_ERR, "The da_daemon: cannot connect to return socket. Error: %s\n", strerror(errno));
 		close(returnFD);
@@ -84,13 +83,13 @@ static void skeleton_daemon()
 
     pid = fork();
 
-    if (pid < 0)
+    if(pid < 0)
         exit(EXIT_FAILURE);
 
-    if (pid > 0)
+    if(pid > 0)
         exit(EXIT_SUCCESS);
 
-    if (setsid() < 0)
+    if(setsid() < 0)
         exit(EXIT_FAILURE);
 
     signal(SIGCHLD, SIG_IGN);
@@ -98,16 +97,16 @@ static void skeleton_daemon()
 
     pid = fork();
 
-    if (pid < 0)
+    if(pid < 0)
         exit(EXIT_FAILURE);
 
-    if (pid > 0)
+    if(pid > 0)
         exit(EXIT_SUCCESS);
 
     umask(0);
     chdir("/");
 
-    for (int x = sysconf(_SC_OPEN_MAX); x >= 0; --x)
+    for(int x = sysconf(_SC_OPEN_MAX); x >= 0; --x)
     {
         close(x);
     }
@@ -153,7 +152,6 @@ struct request_details * get_request_details(const char *const buff){
                 return NULL;
             }
         }
-
         
         return incoming_request;
     }
@@ -166,11 +164,11 @@ _Noreturn int run_daemon()
 
     syslog(LOG_NOTICE, "The da_daemon started.");
 
-    while (1)
+    while(1)
     {
         int ConnectFD = accept(SocketFD, NULL, NULL);
 
-        if (ConnectFD == -1)
+        if(ConnectFD == -1)
         {
             syslog(LOG_ERR, "The da_daemon: accept failed. Error: %s\n", strerror(errno));
             close(SocketFD);
@@ -185,7 +183,7 @@ _Noreturn int run_daemon()
 
         syslog(LOG_NOTICE, "Daemon read %d\n", nr_read);
 
-        if (nr_read < 1)
+        if(nr_read < 1)
         {
             syslog(LOG_ERR, "The da_daemon: read failed. Error: %s\n", strerror(errno));
             continue;
@@ -207,11 +205,7 @@ _Noreturn int run_daemon()
                 free(current_request);
             }
 
-            syslog(LOG_NOTICE, "Daemon crreq reset\n");
-
             current_request = get_request_details(instructions);
-
-            syslog(LOG_NOTICE, "Daemon received crreq\n");
 
             if(current_request == NULL)
             {
@@ -235,7 +229,8 @@ _Noreturn int run_daemon()
                     current_task->task_id = current_task_id;
                     current_task->status = PROCESSING;
                     current_task->priority = current_request->priority;
-                    for(int i=0;i<MAX_PATH_LENGTH;i++)
+
+                    for(int i = 0;i < MAX_PATH_LENGTH; i++)
                         current_task->path[i] = current_request->path[i];
 
                     current_task->files = 0;
@@ -243,13 +238,14 @@ _Noreturn int run_daemon()
                     
                     set_task_details(current_task);
                     
-                    if ( pthread_create (get_task_thread(current_task_id) , NULL , analyze , current_task)) {
+                    if(pthread_create(get_task_thread(current_task_id) , NULL , analyze , current_task)) {
                         perror ("da_daemon cannot create thread");
                         exit(-1);
                     }
+
                     suspend_task(current_task_id,PRIORITY_WAITING);
-                    syslog(LOG_NOTICE, "TASK with id: %d thread created\n", current_task_id);
-                    sprintf(response,"Created analysis task with ID %d for %s and priority %d \n",current_task_id,current_task->path,current_task->priority);
+                    syslog(LOG_NOTICE, "TASK with id: %d thread created.\n", current_task_id);
+                    sprintf(response,"Created analysis task with ID %d for %s and priority %d.\n",current_task_id,current_task->path,current_task->priority);
                     return_response(response);
                 }
                 // TO DO: send back the task id to da / a message if we can not start another task
@@ -257,7 +253,7 @@ _Noreturn int run_daemon()
                     return_response("The daemon can't take more tasks\n");
                 else
                 {
-                    sprintf(response, "Directory ’%s’ is already included in analysis with ID ’%d’\n", current_request->path, -(current_task_id + 1));
+                    sprintf(response, "Directory ’%s’ is already included in analysis with ID ’%d’.\n", current_request->path, -(current_task_id + 1));
                     return_response(response);
                 }
             }
@@ -265,7 +261,9 @@ _Noreturn int run_daemon()
             if(current_request->id == SUSPEND || current_request->id == RESUME || current_request->id == REMOVE)
             {
                 syslog(LOG_NOTICE, "SRR task received\n");
+
                 // modify task status
+
                 if(current_request->id == SUSPEND)
                 {
                     int id = current_request->arg_pid;
@@ -274,25 +272,25 @@ _Noreturn int run_daemon()
                 
                     switch(get_task_status(id)){
                     case PENDING:
-                        return_response("Task doesn't exit\n");
+                        return_response("Task doesn't exist.\n");
                         break;
                     case PROCESSING:
                         suspend_task(id,PAUSED);
 
-                        syslog(LOG_NOTICE, "Paused analysis task with ID %d\n", id);
-                        return_response("Task paused succesfully\n");
+                        syslog(LOG_NOTICE, "Paused analysis task with ID %d.\n", id);
+                        return_response("Task paused succesfully.\n");
                         break;
                     case PAUSED:
-                        return_response("Task already paused\n");
+                        return_response("Task already paused.\n");
                         break;
                     case DONE:
-                        return_response("Task is already done\n");
+                        return_response("Task is already done.\n");
                         break;
                     case PRIORITY_WAITING:
-                        suspend_task(id,PAUSED);
+                        suspend_task(id, PAUSED);
 
-                        syslog(LOG_NOTICE, "Paused analysis task with ID %d\n", id);
-                        return_response("Task paused succesfully\n");
+                        syslog(LOG_NOTICE, "Paused analysis task with ID %d.\n", id);
+                        return_response("Task paused succesfully.\n");
                         break;
                     }
                 }
@@ -305,22 +303,22 @@ _Noreturn int run_daemon()
 
                     switch(get_task_status(id)){
                     case PENDING:
-                        return_response("Task doesn't exit\n");
+                        return_response("Task doesn't exist.\n");
                         break;
                     case PROCESSING:
-                        return_response("Task not paused\n");
+                        return_response("Task not paused.\n");
                         break;
                     case PAUSED:
                         resume_task(id);
 
                         syslog(LOG_NOTICE, "Resumed analysis task with ID %d\n", id);
-                        return_response("Task resumed\n");
+                        return_response("Task resumed.\n");
                         break;
                     case DONE:
-                        return_response("Task not paused\n");
+                        return_response("Task not paused.\n");
                         break;
                     case PRIORITY_WAITING:
-                        return_response("Task not paused\n");
+                        return_response("Task not paused.\n");
                         break;
                     }
                 }
@@ -335,35 +333,35 @@ _Noreturn int run_daemon()
 
                     switch(get_task_status(id)){
                     case PENDING:
-                        return_response("Task doesn't exit\n");
+                        return_response("Task doesn't exist.\n");
                         break;
                     case PROCESSING:
                         remove_task(id);
-                        syslog(LOG_NOTICE, "Removed analysis task with ID %d\n", id);
+                        syslog(LOG_NOTICE, "Removed analysis task with ID %d.\n", id);
             
 
-                        sprintf(response, "Removed analysis task with ID ’%d’, status ’processing’ for ’%s’\n", id, get_task_path(id));
+                        sprintf(response, "Removed analysis task with ID ’%d’, status ’processing’ for ’%s’.\n", id, get_task_path(id));
                         return_response(response);
                         break;
                     case PAUSED:
                         remove_task(id);
                         syslog(LOG_NOTICE, "Removed analysis task with ID %d\n", id);
 
-                        sprintf(response, "Removed analysis task with ID ’%d’, status ’paused’ for ’%s’\n", id, get_task_path(id));
+                        sprintf(response, "Removed analysis task with ID ’%d’, status ’paused’ for ’%s’.\n", id, get_task_path(id));
                         return_response(response);
                         break;
                     case DONE:
                         remove_task(id);
-                        syslog(LOG_NOTICE, "Removed analysis task with ID %d\n", id);
+                        syslog(LOG_NOTICE, "Removed analysis task with ID %d.\n", id);
 
-                        sprintf(response, "Removed analysis task with ID ’%d’, status ’done’ for ’%s’\n", id, get_task_path(id));
+                        sprintf(response, "Removed analysis task with ID ’%d’, status ’done’ for ’%s’.\n", id, get_task_path(id));
                         return_response(response);
                         break;
                     case PRIORITY_WAITING:
                         remove_task(id);
-                        syslog(LOG_NOTICE, "Removed analysis task with ID %d\n", id);
+                        syslog(LOG_NOTICE, "Removed analysis task with ID %d.\n", id);
 
-                        sprintf(response, "Removed analysis task with ID ’%d’, status ’priority_waiting’ for ’%s’\n", id, get_task_path(id));
+                        sprintf(response, "Removed analysis task with ID ’%d’, status ’priority_waiting’ for ’%s’.\n", id, get_task_path(id));
                         return_response(response);
                         break;
                     }
@@ -384,22 +382,22 @@ _Noreturn int run_daemon()
 
                 switch(info->status){
                 case PENDING:
-                    return_response("Task doesn't exist\n");
+                    return_response("Task doesn't exist.\n");
                     break;
                 case PROCESSING:
-                    sprintf(response, "ID  Path  Priority  Done  Status  Details\n%d  %s  %d  %0.2f%% processing  %d dirs %d files\n", id, info->path, info->priority, (double)0, info->dirs, info->files);
+                    sprintf(response, "ID  Path  Priority  Done  Status\n%d  %s  %d  %0.2lf%% processing.\n", id, info->path, info->priority, (double)0);
                     return_response(response);
                     break;
                 case PAUSED:
-                    sprintf(response, "ID  Path  Priority  Done  Status Details\n%d  %s  %d  %0.2f%% paused  %d dirs %d files\n", id, info->path, info->priority, (double)0, info->dirs, info->files);
+                    sprintf(response, "ID  Path  Priority  Done  Status\n%d  %s  %d  %0.2lf%% paused.\n", id, info->path, info->priority, (double)0);
                     return_response(response);
                     break;
                 case DONE:
-                    sprintf(response, "ID  Path  Priority  Done  Status Details\n%d  %s  %d  %0.2f%% done  %d dirs %d files\n", id, info->path, info->priority, (double)0, info->dirs, info->files);
+                    sprintf(response, "ID  Path  Priority  Done  Status\n%d  %s  %d  %0.2lf%% done.\n", id, info->path, info->priority, (double)0);
                     return_response(response);
                     break;
                 case PRIORITY_WAITING:
-                    sprintf(response, "ID  Path  Priority  Done  Status Details\n%d  %s  %d  %0.2f%% priotiry_waiting  %d dirs %d files\n", id, info->path, info->priority, (double)0, info->dirs, info->files);
+                    sprintf(response, "ID  Path  Priority  Done  Status\n%d  %s  %d  %0.2lf%% priority_waiting.\n", id, info->path, info->priority, (double)0);
                     return_response(response);
                     break;
                 }
@@ -426,7 +424,7 @@ _Noreturn int run_daemon()
 
             if(current_request->id == TERMINATE)
             {
-                if (shutdown(ConnectFD, SHUT_RDWR) == -1)
+                if(shutdown(ConnectFD, SHUT_RDWR) == -1)
                 {
                     syslog(LOG_ERR, "The da_daemon: shutdown failed. Error: %s\n", strerror(errno));
                     close(ConnectFD);
@@ -444,9 +442,7 @@ _Noreturn int run_daemon()
             }
         }
 
-        
-
-        if (shutdown(ConnectFD, SHUT_RDWR) == -1)
+        if(shutdown(ConnectFD, SHUT_RDWR) == -1)
         {
             syslog(LOG_ERR, "The da_daemon: shutdown failed. Error: %s\n", strerror(errno));
             close(ConnectFD);
@@ -472,7 +468,7 @@ int main()
 
     int error = run_daemon();
 
-    if (error)
+    if(error)
         syslog(LOG_NOTICE, "Failed to start da_daemon, error code: %d\n", error);
 
     return 0;

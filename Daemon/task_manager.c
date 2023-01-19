@@ -162,3 +162,35 @@ void priority_compute()
         }
     }
 }
+
+int get_task_files_no(int task_id)
+{
+    int _files;
+    pthread_mutex_lock(&status_mutex[task_id]);
+    _files = task[task_id]->files;
+    pthread_mutex_unlock(&status_mutex[task_id]);
+    return _files;
+}
+
+void set_task_files_no(int task_id, int no_files)
+{
+    pthread_mutex_lock(&status_mutex[task_id]);
+    task[task_id]->files = no_files;
+    pthread_mutex_unlock(&status_mutex[task_id]);
+}
+
+int get_task_dirs_no(int task_id)
+{
+    int _dirs;
+    pthread_mutex_lock(&status_mutex[task_id]);
+    _dirs = task[task_id]->dirs;
+    pthread_mutex_unlock(&status_mutex[task_id]);
+    return _dirs;
+}
+
+void set_task_dirs_no(int task_id, int no_dirs)
+{
+    pthread_mutex_lock(&status_mutex[task_id]);
+    task[task_id]->dirs = no_dirs;
+    pthread_mutex_unlock(&status_mutex[task_id]);
+}

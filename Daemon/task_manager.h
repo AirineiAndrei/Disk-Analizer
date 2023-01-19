@@ -42,4 +42,12 @@ void notify_task_done(int task_id);
 
 void priority_compute();
 
+int get_task_files_no(int task_id);
+
+void set_task_files_no(int task_id, int no_files);
+
+int get_task_dirs_no(int task_id);
+
+void set_task_dirs_no(int task_id, int no_dirs);
+
 #endif // TASK_MANAGER_H
