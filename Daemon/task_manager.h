@@ -52,7 +52,7 @@ void set_task_dirs_no(int task_id, int no_dirs);
 
 int get_task_priority(int task_id);
 
-int set_task_progress(int task_id, double progress);
+void set_task_progress(int task_id, double progress);
 
 double get_task_progress(int task_id);
 
