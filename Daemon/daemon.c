@@ -251,7 +251,7 @@ _Noreturn int run_daemon()
                 }
                 // TO DO: send back the task id to da / a message if we can not start another task
                 else if(current_task_id == MAX_TASKS)
-                    return_response("The daemon cant take more tasks\n");
+                    return_response("The daemon can't take more tasks\n");
                 else
                 {
                     sprintf(response, "Directory ’%s’ is already included in analysis with ID ’%d’\n", current_request->path, -(current_task_id + 1));
