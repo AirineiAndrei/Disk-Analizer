@@ -50,4 +50,6 @@ int get_task_dirs_no(int task_id);
 
 void set_task_dirs_no(int task_id, int no_dirs);
 
+int get_task_priority(int task_id);
+
 #endif // TASK_MANAGER_H

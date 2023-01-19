@@ -194,3 +194,11 @@ void set_task_dirs_no(int task_id, int no_dirs)
     task[task_id]->dirs = no_dirs;
     pthread_mutex_unlock(&status_mutex[task_id]);
 }
+
+int get_task_priority(int task_id)
+{
+    int _priority;
+    pthread_mutex_lock(&status_mutex[task_id]);
+    _priority = task[task_id]->priority;
+    pthread_mutex_unlock(&status_mutex[task_id]);
+}

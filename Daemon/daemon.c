@@ -385,19 +385,19 @@ _Noreturn int run_daemon()
                     return_response("Task doesn't exist.\n");
                     break;
                 case PROCESSING:
-                    sprintf(response, "ID  Path  Priority  Done  Status\n%d  %s  %d  %0.2lf%% processing.\n", id, info->path, info->priority, (double)0);
+                    sprintf(response, "ID  Path  Priority  Done  Status  Details\n%d  %s  %d  %0.2lf%%  processing.  %d files, %d dirs\n", id, info->path, get_task_priority(id), (double)0, get_task_files_no(id), get_task_dirs_no(id));
                     return_response(response);
                     break;
                 case PAUSED:
-                    sprintf(response, "ID  Path  Priority  Done  Status\n%d  %s  %d  %0.2lf%% paused.\n", id, info->path, info->priority, (double)0);
+                    sprintf(response, "ID  Path  Priority  Done  Status  Details\n%d  %s  %d  %0.2lf%%  processing.  %d files, %d dirs\n", id, info->path, get_task_priority(id), (double)0, get_task_files_no(id), get_task_dirs_no(id));
                     return_response(response);
                     break;
                 case DONE:
-                    sprintf(response, "ID  Path  Priority  Done  Status\n%d  %s  %d  %0.2lf%% done.\n", id, info->path, info->priority, (double)0);
+                    sprintf(response, "ID  Path  Priority  Done  Status  Details\n%d  %s  %d  %0.2lf%%  processing.  %d files, %d dirs\n", id, info->path, get_task_priority(id), (double)0, get_task_files_no(id), get_task_dirs_no(id));
                     return_response(response);
                     break;
                 case PRIORITY_WAITING:
-                    sprintf(response, "ID  Path  Priority  Done  Status\n%d  %s  %d  %0.2lf%% priority_waiting.\n", id, info->path, info->priority, (double)0);
+                    sprintf(response, "ID  Path  Priority  Done  Status  Details\n%d  %s  %d  %0.2lf%%  processing.  %d files, %d dirs\n", id, info->path, get_task_priority(id), (double)0, get_task_files_no(id), get_task_dirs_no(id));
                     return_response(response);
                     break;
                 }
