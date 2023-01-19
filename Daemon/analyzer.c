@@ -68,8 +68,9 @@ long long write_report(const char *path,const char* relative_path, FILE * out_fd
     }
     closedir(dir);
 
-    double percent = ((double) size / (double) total_size) * 100;
-    double print_size = (double) size / 1024;
+    long long actual_size = size + 4096;
+    double percent = (double) actual_size / (double) total_size * 100;
+    double print_size = (double) actual_size / 1024;
 
     double max_hashtag = (double) MAX_HASHTAG;
     int curent_hashtag = (int) (max_hashtag * percent / 100);
