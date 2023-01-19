@@ -407,6 +407,18 @@ _Noreturn int run_daemon()
             {
                 // list all tasks
                 syslog(LOG_NOTICE, "LIST task received\n");
+
+                char response[1024] = "/";
+                char curr[3] = "";
+
+                for(int i = 0; i < MAX_TASKS; i++)
+                    if(get_task_status(i) != PENDING)
+                    {
+                        sprintf(curr, "%d/", i);
+                        strcat(response, curr);
+                    }
+
+                return_response(response);
             }
 
             if(current_request->id == PRINT)

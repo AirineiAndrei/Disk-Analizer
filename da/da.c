@@ -99,6 +99,33 @@ void send_request(const char *const buff, const int size)
 	write(SocketFD, buff, size);
 }
 
+void print_daemon_response()
+{
+	//	 da reads response from Daemon here
+	
+	int ConnectFD = accept(returnFD, NULL, NULL);
+
+	if (ConnectFD == -1)
+	{
+		perror("accept failed");
+		close_socket();
+		exit(EXIT_FAILURE);
+	}
+
+	char response[1024]="";
+
+	int nr_read = read(ConnectFD, response, 1024);
+
+	if(nr_read < 1)
+	{
+		perror("return read failed");
+		close_socket();
+		exit(EXIT_FAILURE);
+	}
+
+	printf("%s", response);
+}
+
 void print_tmp(int task_id)
 {
 	char print_command[MAX_PATH_LENGTH];
@@ -109,78 +136,85 @@ void print_tmp(int task_id)
 
 void print_task_response(int task_id)
 {
-	while(1)
+	
+	int ConnectFD = accept(returnFD, NULL, NULL);
+
+	if (ConnectFD == -1)
 	{
-		int ConnectFD = accept(returnFD, NULL, NULL);
-
-		if (ConnectFD == -1)
-		{
-			perror("accept failed");
-			close_socket();
-			exit(EXIT_FAILURE);
-		}
-
-		char response[1024]="";
-
-		int nr_read = read(ConnectFD, response, 1024);
-
-		if(nr_read < 1)
-		{
-			perror("return read failed");
-			close_socket();
-			exit(EXIT_FAILURE);
-		}
-
-		char *endptr = NULL;
-		int done = strtol(response, &endptr, 10);
-
-		if (check_error_strtol(response, endptr, done))
-		{
-			printf("Invalid response for print task\n");
-			close_socket();
-			//printf("closed socket\n");
-			return;
-		}
-
-		if(done == 0)
-			printf("Analysis task with ID '%d' is not done yet\n", task_id);
-		else
-			print_tmp(task_id);
-
-		break;
+		perror("accept failed");
+		close_socket();
+		exit(EXIT_FAILURE);
 	}
+
+	char response[1024]="";
+
+	int nr_read = read(ConnectFD, response, 1024);
+
+	if(nr_read < 1)
+	{
+		perror("return read failed");
+		close_socket();
+		exit(EXIT_FAILURE);
+	}
+
+	char *endptr = NULL;
+	int done = strtol(response, &endptr, 10);
+
+	if (check_error_strtol(response, endptr, done))
+	{
+		printf("Invalid response for print task\n");
+		close_socket();
+		//printf("closed socket\n");
+		return;
+	}
+
+	if(done == 0)
+		printf("Analysis task with ID '%d' is not done yet\n", task_id);
+	else
+		print_tmp(task_id);
 }
 
-void print_daemon_response()
+void print_task_list()
 {
 	// da reads response from Daemon here
 
-	while(1)
+	char response[1024]="";
+
+	int ConnectFD = accept(returnFD, NULL, NULL);
+
+	if (ConnectFD == -1)
 	{
-		int ConnectFD = accept(returnFD, NULL, NULL);
-
-		if (ConnectFD == -1)
-		{
-			perror("accept failed");
-			close_socket();
-			exit(EXIT_FAILURE);
-		}
-
-		char response[1024]="";
-
-		int nr_read = read(ConnectFD, response, 1024);
-
-		if(nr_read < 1)
-		{
-			perror("return read failed");
-			close_socket();
-			exit(EXIT_FAILURE);
-		}
-
-		printf("%s", response);
-
-		break;
+		perror("accept failed");
+		close_socket();
+		exit(EXIT_FAILURE);
 	}
+
+	int nr_read = read(ConnectFD, response, 1024);
+
+	if(nr_read < 1)
+	{
+		perror("return read failed");
+		close_socket();
+		exit(EXIT_FAILURE);
+	}
+
+
+	char instructions[512] = "";
+	char *ids = strtok(response, "/"); 
+	while(ids != NULL)
+	{
+		int task_id = atoi(ids);
+
+		sprintf(instructions, "ID %d\nPID %d\n", INFO, task_id);
+		send_request(instructions, strlen(instructions));
+
+		print_daemon_response();
+
+		printf("____________________________________________\n");
+		
+		ids = strtok(NULL, "/");
+	}
+
 }
 
 int main(int argc, char **argv)
@@ -397,6 +431,8 @@ int main(int argc, char **argv)
 
 		sprintf(instructions, "ID %d\n", LIST);
 		send_request(instructions, strlen(instructions));
+
+		print_task_list();
 
 		close_socket();
 		//printf("closed socket\n");
