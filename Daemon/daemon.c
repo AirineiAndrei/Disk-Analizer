@@ -384,6 +384,13 @@ _Noreturn int run_daemon()
             {
                 // print a task
                 syslog(LOG_NOTICE, "PRINT task received\n");
+
+                int id = current_request->arg_pid;
+
+                if(get_task_status(id) == DONE)
+                    return_response("1\n");
+                else
+                    return_response("0\n");
             }
 
             if(current_request->id == TERMINATE)
