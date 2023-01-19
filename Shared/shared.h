@@ -34,6 +34,7 @@ struct request_details{
 
 struct task_details{
     int task_id, status, priority;
+    int files, dirs;
     char path[MAX_PATH_LENGTH];
     char progress_details[MAX_PROGRESS_LENGTH];
 };

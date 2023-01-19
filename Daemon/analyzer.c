@@ -30,7 +30,7 @@ void* analyze(void* info)
     FILE * out_fd = fopen(output_path, "w");
     syslog(LOG_NOTICE,"Output path is %s",output_path);
 
-    write_report(current_task->path,"/",out_fd,total_size,0,current_task->task_id);
+    write_report(current_task->path,"/",out_fd,total_size,0,current_task->task_id, current_task);
 
     fclose(out_fd);
 
@@ -39,7 +39,7 @@ void* analyze(void* info)
     return NULL;
 }
 
-long long write_report(const char *path,const char* relative_path, FILE * out_fd, int total_size,int depth,int task_id)
+long long write_report(const char *path,const char* relative_path, FILE * out_fd, int total_size,int depth,int task_id, struct task_details* current_task)
 {
     permission_to_continue(task_id);
     DIR *dir = opendir(path);
@@ -55,7 +55,12 @@ long long write_report(const char *path,const char* relative_path, FILE * out_fd
     while(1) // for every file in current folder
     {
         sub_dir = readdir(dir);
+
         if(!sub_dir)break;
+
+        if(sub_dir->d_type == DT_REG)
+            current_task->files ++;
+            
         if (strcmp(sub_dir->d_name, ".") != 0 && strcmp(sub_dir->d_name, "..") != 0) {
 
             add_to_path(path,sub_dir->d_name,sub_path);
@@ -63,10 +68,12 @@ long long write_report(const char *path,const char* relative_path, FILE * out_fd
 
             // if(sub_dir->d_type != 4)// just in case we want to consider only containing files not folder size (4096)
             size += (long long)fsize(sub_path);
-            size += write_report(sub_path,sub_relative_path,out_fd,total_size,depth+1,task_id);
+            size += write_report(sub_path,sub_relative_path,out_fd,total_size,depth+1,task_id, current_task);
         }
     }
     closedir(dir);
+
+    current_task->dirs ++;
 
     long long actual_size = size + 4096;
     double percent = (double) actual_size / (double) total_size * 100;

@@ -237,6 +237,9 @@ _Noreturn int run_daemon()
                     current_task->priority = current_request->priority;
                     for(int i=0;i<MAX_PATH_LENGTH;i++)
                         current_task->path[i] = current_request->path[i];
+
+                    current_task->files = 0;
+                    current_task->dirs = 0;
                     
                     set_task_details(current_task);
                     
@@ -384,19 +387,19 @@ _Noreturn int run_daemon()
                     return_response("Task doesn't exist\n");
                     break;
                 case PROCESSING:
-                    sprintf(response, "ID  Path  Priority  Done  Status\n%d  %s  %d  %0.2f%% processing\n", id, info->path, info->priority, (double)0);
+                    sprintf(response, "ID  Path  Priority  Done  Status  Details\n%d  %s  %d  %0.2f%% processing  %d dirs %d files\n", id, info->path, info->priority, (double)0, info->dirs, info->files);
                     return_response(response);
                     break;
                 case PAUSED:
-                    sprintf(response, "ID  Path  Priority  Done  Status\n%d  %s  %d  %0.2f%% paused\n", id, info->path, info->priority, (double)0);
+                    sprintf(response, "ID  Path  Priority  Done  Status Details\n%d  %s  %d  %0.2f%% paused  %d dirs %d files\n", id, info->path, info->priority, (double)0, info->dirs, info->files);
                     return_response(response);
                     break;
                 case DONE:
-                    sprintf(response, "ID  Path  Priority  Done  Status\n%d  %s  %d  %0.2f%% done\n", id, info->path, info->priority, (double)0);
+                    sprintf(response, "ID  Path  Priority  Done  Status Details\n%d  %s  %d  %0.2f%% done  %d dirs %d files\n", id, info->path, info->priority, (double)0, info->dirs, info->files);
                     return_response(response);
                     break;
                 case PRIORITY_WAITING:
-                    sprintf(response, "ID  Path  Priority  Done  Status\n%d  %s  %d  %0.2f%% priotiry_waiting\n", id, info->path, info->priority, (double)0);
+                    sprintf(response, "ID  Path  Priority  Done  Status Details\n%d  %s  %d  %0.2f%% priotiry_waiting  %d dirs %d files\n", id, info->path, info->priority, (double)0, info->dirs, info->files);
                     return_response(response);
                     break;
                 }
