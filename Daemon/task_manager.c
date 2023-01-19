@@ -13,13 +13,31 @@ void init_task_manager()
     }
 }
 
-int get_new_task_id()
+int prefix(const char *new_path, const char *old_path)
 {
+    if(strlen(new_path) < strlen(old_path))
+        return 0;
+
+    return strncmp(new_path, old_path, strlen(old_path)) == 0;
+}
+
+char *get_task_path(int task_id)
+{
+    return task[task_id]->path; 
+}
+
+int get_new_task_id(const char *new_path)
+{
+    //  returneaza id-ul taskului care contine deja noul path
+    for(int i = 0; i < MAX_TASKS; i++)
+        if(get_task_status(i) != PENDING && prefix(new_path, get_task_path(i)))
+            return -i - 1;
+
     for(int i = 0; i < MAX_TASKS;i++)
         if(get_task_status(i) == PENDING){
             return i;
-        } 
-    return -1;
+        }
+    return MAX_TASKS;
 }
 
 pthread_t* get_task_thread(int task_id)

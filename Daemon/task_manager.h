@@ -13,7 +13,11 @@
 
 void init_task_manager();
 
-int get_new_task_id();
+int prefix(const char *new_path, const char *old_path);
+
+char *get_task_path(int task_id);
+
+int get_new_task_id(const char *new_path);
 
 pthread_t* get_task_thread(int task_id);
 

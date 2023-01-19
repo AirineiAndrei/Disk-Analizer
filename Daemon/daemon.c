@@ -216,8 +216,8 @@ _Noreturn int run_daemon()
             {
                 // add task
                 syslog(LOG_NOTICE, "ADD task is: %d, %s\n", current_request->priority, current_request->path);
-                int current_task_id = get_new_task_id();
-                if(current_task_id != -1)
+                int current_task_id = get_new_task_id(current_request->path);
+                if(current_task_id >= 0 && current_task_id != MAX_TASKS)
                 {
                     // We start this task
                     struct task_details* current_task = (struct task_details*) malloc(sizeof(struct task_details));
@@ -239,8 +239,13 @@ _Noreturn int run_daemon()
                     return_response(response);
                 }
                 // TO DO: send back the task id to da / a message if we can not start another task
-                else
+                else if(current_task_id == MAX_TASKS)
                     return_response("The daemon cant take more tasks\n");
+                else
+                {
+                    sprintf(response, "The task with ID %d contains this directory\n", -(current_task_id + 1));
+                    return_response(response);
+                }
             }
 
             if(current_request->id == SUSPEND || current_request->id == RESUME || current_request->id == REMOVE)
