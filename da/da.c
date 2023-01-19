@@ -153,7 +153,8 @@ void print_task_response(int task_id)
 
 void print_daemon_response()
 {
-	//	 da reads response from Daemon here
+	// da reads response from Daemon here
+
 	while(1)
 	{
 		int ConnectFD = accept(returnFD, NULL, NULL);
@@ -185,7 +186,8 @@ void print_daemon_response()
 int main(int argc, char **argv)
 {
 	create_return_socket();
-	open_socket(); // TODO close sock
+	open_socket();
+	
 	// printf("opened socket\n");
 
 	if (argc == 1)

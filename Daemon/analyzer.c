@@ -68,7 +68,7 @@ long long write_report(const char *path,const char* relative_path, FILE * out_fd
     }
     closedir(dir);
 
-    double percent = (double) size / (double) total_size * 100;
+    double percent = ((double) size / (double) total_size) * 100;
     double print_size = (double) size / 1024;
 
     double max_hashtag = (double) MAX_HASHTAG;
@@ -79,17 +79,17 @@ long long write_report(const char *path,const char* relative_path, FILE * out_fd
 
     if(depth == 0)
     {
-        fprintf(out_fd, "%s  %0.2f%%  %0.2fKB  %s\n", path, percent, print_size, hashtag);
+        fprintf(out_fd, "%s  %0.2lf%%  %0.2lfKB  %s\n", path, percent, print_size, hashtag);
         fprintf(out_fd, "Path\tUsage\tSize\tAmount\n");
     }
     else if(depth == 1)
     {
-        fprintf(out_fd, "|-%s  %0.2f%%  %0.2fKB  %s\n", relative_path, percent, print_size, hashtag);
+        fprintf(out_fd, "|-%s  %0.2lf%%  %0.2lfKB  %s\n", relative_path, percent, print_size, hashtag);
         fprintf(out_fd, "|\n");
     }
     else
     {
-        fprintf(out_fd, "|-%s  %0.2f%%  %0.2fKB  %s\n", relative_path, percent, print_size, hashtag);
+        fprintf(out_fd, "|-%s  %0.2lf%%  %0.2lfKB  %s\n", relative_path, percent, print_size, hashtag);
     }
 
     // size is the size of this subdir
