@@ -166,6 +166,7 @@ _Noreturn int run_daemon()
 
     while(1)
     {
+
         int ConnectFD = accept(SocketFD, NULL, NULL);
 
         if(ConnectFD == -1)
@@ -380,6 +381,8 @@ _Noreturn int run_daemon()
     
                 char response[1024]= "";
 
+                syslog(LOG_NOTICE, "INFO status: %d\n", info->status);
+
                 switch(info->status){
                 case PENDING:
                     return_response("Task doesn't exist.\n");
@@ -393,11 +396,11 @@ _Noreturn int run_daemon()
                     return_response(response);
                     break;
                 case DONE:
-                    sprintf(response, "ID  Path  Priority  Done  Status  Details\n%d  %s  %d  %0.2lf%%  processing.  %d files, %d dirs\n", id, info->path, get_task_priority(id), (double)0, get_task_files_no(id), get_task_dirs_no(id));
+                    sprintf(response, "ID  Path  Priority  Done  Status  Details\n%d  %s  %d  %0.2lf%%  processing.  %d files, %d dirs\n", id, info->path, get_task_priority(id), get_task_progress(id), get_task_files_no(id), get_task_dirs_no(id));
                     return_response(response);
                     break;
                 case PRIORITY_WAITING:
-                    sprintf(response, "ID  Path  Priority  Done  Status  Details\n%d  %s  %d  %0.2lf%%  processing.  %d files, %d dirs\n", id, info->path, get_task_priority(id), (double)0, get_task_files_no(id), get_task_dirs_no(id));
+                    sprintf(response, "ID  Path  Priority  Done  Status  Details\n%d  %s  %d  %0.2lf%%  processing.  %d files, %d dirs\n", id, info->path, get_task_priority(id), get_task_progress(id), get_task_files_no(id), get_task_dirs_no(id));
                     return_response(response);
                     break;
                 }
@@ -408,13 +411,13 @@ _Noreturn int run_daemon()
                 // list all tasks
                 syslog(LOG_NOTICE, "LIST task received\n");
 
-                char response[1024] = "/";
-                char curr[3] = "";
+                char response[10240] = "ID  Path  Done Status         Details\n";
+                char curr[512] = "";
 
                 for(int i = 0; i < MAX_TASKS; i++)
                     if(get_task_status(i) != PENDING)
                     {
-                        sprintf(curr, "%d/", i);
+                        sprintf(curr, "%d  %s    %0.2lf%% in progress   %d files, %d dirs\n", i, get_task_path(i), get_task_progress(i), get_task_files_no(i), get_task_dirs_no(i));
                         strcat(response, curr);
                     }
 
@@ -473,7 +476,6 @@ _Noreturn int run_daemon()
 
 int main()
 {
-
     skeleton_daemon();
     create_socket();
     init_task_manager();

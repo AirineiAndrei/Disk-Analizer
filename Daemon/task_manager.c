@@ -202,3 +202,18 @@ int get_task_priority(int task_id)
     _priority = task[task_id]->priority;
     pthread_mutex_unlock(&status_mutex[task_id]);
 }
+
+int set_task_progress(int task_id, double progress)
+{
+    pthread_mutex_lock(&status_mutex[task_id]);
+    task[task_id]->progress = progress;
+    pthread_mutex_unlock(&status_mutex[task_id]);
+}
+
+double get_task_progress(int task_id)
+{
+    double _progress;
+    pthread_mutex_lock(&status_mutex[task_id]);
+    _progress = task[task_id]->progress;
+    pthread_mutex_unlock(&status_mutex[task_id]);
+}

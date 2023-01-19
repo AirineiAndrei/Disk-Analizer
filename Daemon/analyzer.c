@@ -15,8 +15,8 @@ void* analyze(void* info)
     struct task_details* current_task = (struct task_details*) info;
     syslog(LOG_NOTICE,"Starting analyzing job from  %s\n", current_task->path);
 
-
-
+    long long * sum_size = (long long *) malloc(sizeof(long long *));
+    *sum_size = 0; 
     long long total_size = dfs_find_size_on_disk(current_task->path,current_task->task_id); // Need this to estimate progress
     syslog(LOG_NOTICE,"Total size of %s task id %d is %lld\n", current_task->path,current_task->task_id,total_size);
 
@@ -33,7 +33,7 @@ void* analyze(void* info)
     FILE * out_fd = fopen(output_path, "w");
     syslog(LOG_NOTICE,"Output path is %s",output_path);
 
-    write_report(current_task->path,"/",out_fd,total_size,0,current_task->task_id);
+    write_report(current_task->path,"/",out_fd,total_size,0,current_task->task_id, sum_size);
 
     fclose(out_fd);
 
@@ -42,7 +42,7 @@ void* analyze(void* info)
     return NULL;
 }
 
-long long write_report(const char *path,const char* relative_path, FILE * out_fd, long long total_size,int depth, int task_id)
+long long write_report(const char *path, const char* relative_path, FILE * out_fd, long long total_size, int depth, int task_id, long long * sum_size)
 {
     permission_to_continue(task_id);
     DIR *dir = opendir(path);
@@ -72,8 +72,14 @@ long long write_report(const char *path,const char* relative_path, FILE * out_fd
             add_to_path(relative_path,sub_dir->d_name,sub_relative_path);
 
             // if(sub_dir->d_type != 4)// just in case we want to consider only containing files not folder size (4096)
-            size += (long long)fsize(sub_path);
-            size += write_report(sub_path,sub_relative_path,out_fd,total_size,depth + 1,task_id);
+            long long aux = (long long)fsize(sub_path);
+             
+            size += aux;
+            *sum_size += aux;
+            
+            aux = write_report(sub_path,sub_relative_path,out_fd,total_size,depth + 1,task_id, sum_size);
+            
+            size += aux;
         }
     }
     closedir(dir);
@@ -82,8 +88,10 @@ long long write_report(const char *path,const char* relative_path, FILE * out_fd
     set_task_dirs_no(task_id, get_task_dirs_no(task_id) + 1);
 
     long long actual_size = size;
-    if(depth != 0)
+
+    if(depth != 0){
         actual_size += 4096;
+    }
     double percent = (((long double) actual_size) / ((long double) total_size)) * 100;
     double print_size = ((long double) actual_size) / 1024;
 
@@ -107,6 +115,8 @@ long long write_report(const char *path,const char* relative_path, FILE * out_fd
     {
         fprintf(out_fd, "|-%s  %0.2lf%%  %0.2lfKB  %s\n", relative_path, percent, print_size, hashtag);
     }
+
+    set_task_progress(task_id, (((double) *sum_size) / ((double) total_size)) * 100);
 
     // size is the size of this subdir
     return size;
